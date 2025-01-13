@@ -3,18 +3,21 @@ import iSeekerRepository from "../../entities/iRepositories/iSeekerRepository";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import { seekerDetailsRule } from "../../entities/rules/seekerRules";
-import { hashPassword } from "../../frameworks/services/passwordService";
+import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
+
 
 class SeekerRepository implements iSeekerRepository {
 
     async seekerExists(email: string): Promise<boolean> {
         try {
             const seekerAlreadyExist = await seekerModel.findOne({email: email})
-
+            console.log('seeker exist: ', seekerAlreadyExist)
             if(!seekerAlreadyExist){
+                console.log('enter in false condition')
                 return false
             }
-                return true
+            console.log('return true afte finding seekr')
+            return true
         } catch (error: any) {
             console.error('Error in finding seeker at seekerRepository: ', error.message)
             return false
@@ -79,7 +82,7 @@ class SeekerRepository implements iSeekerRepository {
 
     async createSeeker(userData: seekerDetailsRule): Promise<{created: boolean}> {
         try{
-            const hashedPassword = await hashPassword(userData.password)
+            const hashedPassword = await hashPassword(userData.password as string)
        
             const newSeeker = await seekerModel.create({
                 firstName: userData.firstName,
@@ -97,6 +100,42 @@ class SeekerRepository implements iSeekerRepository {
         }catch(error: any){
             console.error('Error in creating user at seeker repository: ', error.message)
             return {created: false}
+        }
+    }
+
+
+    async loginSeeker(email: string, password: string): Promise<{user?: seekerDetailsRule, success: boolean, message: string}> {
+        try {
+            const findUser = await seekerModel.findOne({email: email.trim()})
+            if(!findUser){
+                return {success: false, message: 'Incorrect email'}
+            }
+
+            const isPassword = await comparePassword(password, findUser.password as string)
+            if(!isPassword){
+                return {success: false, message: 'Incorrect password'}
+            }
+
+            if(findUser.blocked){
+                return {success: false, message: 'Access denied. Your account is blocked'}
+            }
+
+            const user:seekerDetailsRule = {
+                id: findUser._id,
+                firstName: findUser.firstName,
+                lastName: findUser.lastName,
+                email: findUser.email,
+                mobile: findUser.mobile,
+                logo: findUser.logo,
+                blocked: findUser.blocked
+            }
+
+            return {user: user, success: true, message: 'User login successful'}
+
+
+        } catch (error: any) {
+            console.error('Error in login seeker at seekerRespository: ', error.message)
+            return {success: false, message: 'Something went wrong'}
         }
     }
 }

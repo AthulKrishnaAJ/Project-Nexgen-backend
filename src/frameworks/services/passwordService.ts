@@ -8,6 +8,21 @@ export const hashPassword =  async (password: string): Promise<string> => {
         return hashedPassword   
     } catch (error: any) {
         console.error('Error in hasing passwor at password service file at service: ', error.message)
-        throw new Error('Password hashing error')
+        throw new Error('Somthing went wrong')
+    }
+}
+
+
+
+export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
+    try{
+        const isPassword = await bcrypt.compare(password, hashedPassword)
+        if(!isPassword){
+            return false
+        }
+        return true
+    }catch(error: any){
+        console.error('Error in comparing password at password services: ', error.message)
+        throw new Error('Something went wrong')
     }
 }

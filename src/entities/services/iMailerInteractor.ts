@@ -2,7 +2,7 @@ import { mailConfigRule } from "../rules/commonRules"
 import dotenv from 'dotenv'
 dotenv.config()
 
-export interface iMailerInterface {
+export interface IMailerInterface {
     sendMail(email: string): Promise<{otp?: string, success: boolean}>
 }
 

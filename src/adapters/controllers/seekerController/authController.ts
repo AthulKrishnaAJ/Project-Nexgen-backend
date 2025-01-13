@@ -8,6 +8,7 @@ import httpStatus from "../../../entities/rules/httpStatusCodes";
 //types
 import { seekerDetailsRule } from "../../../entities/rules/seekerRules";
 
+
 class AuthController {
     private interactor: ISeekerAuthInterface
 
@@ -91,6 +92,36 @@ class AuthController {
         } catch (error: any) {
             console.error('Error occured while resending otp at resendOtpControl: ', error.message)
             return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'An unexpected error occur'})
+        }
+    }
+
+
+    loginControl = async (req: Request, res: Response): Promise<any> => {
+        try {
+            const {email, password} = req.body
+            console.log('====>',email, password)
+            const response = await this.interactor.login(email, password)
+            if(!response.success){
+                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: response.message})
+            } else {
+                res.cookie('RefreshToken', response.refreshToken,{
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'none',
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
+                    path:'/'
+                })
+                res.cookie('AccessToken', response.accessToken,{
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "none",
+                    maxAge: 15 * 60 * 1000,
+                    path: '/',
+                })
+                return res.status(httpStatus.OK).json({user: response.user, status: true, message: response.message})
+            }
+        } catch (error: any) {
+            console.error('Error occur while login seeker at loginControl: ', error.message)
         }
     }
 }
