@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 9009;
 const server = net.createServer();
 server.once("error", (err: any) => {
     if (err.code === "EADDRINUSE") {
-        console.error(`Port ${PORT} is already in use!`);
+        console.error(`Port ${PORT} is already in use! ${err}`);
         process.exit(1);
     } else {
         throw err;

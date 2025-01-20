@@ -1,32 +1,28 @@
-//Files
-import iSeekerRepository from "../../entities/iRepositories/iSeekerRepository";
+import ICompanyRepository from "../../entities/iRepositories/ICompanyRepository";
+import employerModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
-import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
-import { seekerDetailsRule } from "../../entities/rules/seekerRules";
+import { EmployerDetailsRule } from "../../entities/rules/companyRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
 
+class CompanyRepository implements ICompanyRepository {
 
-class SeekerRepository implements iSeekerRepository {
-
-    async seekerExists(email: string): Promise<boolean> {
+    async employerExists(email: string): Promise<boolean> {
         try {
-            const seekerAlreadyExist = await seekerModel.findOne({email: email})
-            console.log('seeker exist: ', seekerAlreadyExist)
-            if(!seekerAlreadyExist){
+            const employerAlreadyExist = await employerModel.findOne({email: email})
+            console.log('employer exist: ', employerAlreadyExist)
+            if(!employerAlreadyExist){
                 console.log('enter in false condition')
                 return false
             }
             console.log('return true afte finding seekr')
             return true
         } catch (error: any) {
-            console.error('Error in finding seeker at seekerRepository: ', error.message)
+            console.error('Error in finding seeker at employerRepository: ', error.message)
             return false
         }
-
-    
     }
 
-    async tempOtp(otp: string, userData: seekerDetailsRule):Promise<{ created: boolean }> {
+    async tempOtp(otp: string, userData: EmployerDetailsRule):Promise<{ created: boolean }> {
         try{
             const expirationTime = 120
             
@@ -38,7 +34,7 @@ class SeekerRepository implements iSeekerRepository {
             await redisClient.set(userData.email, JSON.stringify(dataToStore), {
                 EX: expirationTime
             });
-            console.log('Storing OTP and employer data in redis')
+            console.log('Storing OTP and user data in redis')
             return {created: true}
         }catch(error: any){
             console.log('Error storing OTP in redis: ', error.message)
@@ -46,7 +42,7 @@ class SeekerRepository implements iSeekerRepository {
         }
     }
 
-    async findOtpAndSeeker(email: string, otp: string | undefined, validateOtp: boolean): Promise<{success: boolean, userData?: seekerDetailsRule}> {
+    async findOtpAndEmployer(email: string, otp: string | undefined, validateOtp: boolean): Promise<{success: boolean, userData?: EmployerDetailsRule}> {
         try {
             const data = await redisClient.get(email)
             
@@ -79,15 +75,14 @@ class SeekerRepository implements iSeekerRepository {
         }
     }
 
-
-    async createSeeker(userData: seekerDetailsRule): Promise<{created: boolean}> {
+    async createEmployer(userData: EmployerDetailsRule): Promise<{created: boolean}> {
         try{
             const hashedPassword = await hashPassword(userData.password as string)
        
-            const newSeeker = await seekerModel.create({
+            const newSeeker = await employerModel.create({
                 firstName: userData.firstName,
                 lastName: userData.lastName,
-                email: userData.email.trim(),
+                email: userData.email,
                 mobile: userData.mobile,
                 password: hashedPassword
             })
@@ -103,44 +98,36 @@ class SeekerRepository implements iSeekerRepository {
         }
     }
 
-
-    async loginSeeker(email: string, password: string): Promise<{user?: seekerDetailsRule, success: boolean, message: string}> {
+    async employerLoginRepo(email: string, password: string): Promise<{ userData?: EmployerDetailsRule; success: boolean; message: string; }> {
         try {
-            const findUser = await seekerModel.findOne({email: email})
-            if(!findUser){
+            const findEmployer = await employerModel.findOne({email: email})
+            if(!findEmployer){
                 return {success: false, message: 'Incorrect email'}
             }
 
-            const isPassword = await comparePassword(password, findUser.password as string)
+            const isPassword = await comparePassword(password, findEmployer.password as string)
             if(!isPassword){
                 return {success: false, message: 'Incorrect password'}
             }
 
-            if(findUser.blocked){
+            if(findEmployer.blocked){
                 return {success: false, message: 'Access denied. Your account is blocked'}
             }
-
-            const user:seekerDetailsRule = {
-                id: findUser._id,
-                firstName: findUser.firstName,
-                lastName: findUser.lastName,
-                email: findUser.email,
-                mobile: findUser.mobile,
-                logo: findUser.logo,
-                blocked: findUser.blocked
+            const user: EmployerDetailsRule = {
+                id: findEmployer._id,
+                firstName: findEmployer.firstName,
+                lastName: findEmployer.lastName,
+                email: findEmployer.email,
+                mobile: findEmployer.mobile,
+                blocked: findEmployer.blocked
             }
-
-            return {user: user, success: true, message: 'Login successful'}
-
-
+            return {userData: user, success: true, message: 'Login successful'}
         } catch (error: any) {
-            console.error('Error in login seeker at seekerRespository: ', error.message)
-            return {success: false, message: 'Something went wrong'}
+            console.error('Error in employerLoginRepo at company repository: ', error.message)
+            throw new Error('Somthing went wrong')
         }
     }
+
 }
 
-    
- 
-
-export default SeekerRepository
+export default CompanyRepository

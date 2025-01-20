@@ -49,7 +49,7 @@ class UserAuth implements ISeekerAuthInterface {
 
             if (!isUserExist) {
                 console.log('user not exixiixix')
-                const otpVerified = await this.repository.findOtpAndSeeker(email, otp, true)
+                const otpVerified = await this.repository.findOtpAndSeeker(email.trim(), otp, true)
 
                 if (!otpVerified.success || !otpVerified.userData) {
                     return { success: false, message: 'Invalid Otp' }

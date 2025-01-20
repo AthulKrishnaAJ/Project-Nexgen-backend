@@ -122,6 +122,7 @@ class AuthController {
             }
         } catch (error: any) {
             console.error('Error occur while login seeker at loginControl: ', error.message)
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Somthing went wrong please try again'})
         }
     }
 }

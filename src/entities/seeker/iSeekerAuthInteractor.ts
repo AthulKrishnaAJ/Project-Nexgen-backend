@@ -10,3 +10,16 @@ interface ISeekerAuthInterface {
 
 
 export default ISeekerAuthInterface
+
+
+
+
+
+
+
+
+
+
+
+
+

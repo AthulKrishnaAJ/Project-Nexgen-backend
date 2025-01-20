@@ -15,7 +15,7 @@ class JwtService implements IJwtSerivce {
         return accessToken
     }
 
-    generateRefreshToken(payload: Object, options: jwt.SignOptions): string {
+    generateRefreshToken(payload: Object, options?: jwt.SignOptions): string {
         console.log('refresh key: ', this.refresKey)
         const refreshToken = jwt.sign(payload, this.refresKey, options)
         return refreshToken
