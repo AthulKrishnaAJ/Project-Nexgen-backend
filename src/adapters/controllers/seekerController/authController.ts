@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 
 //files
-import ISeekerAuthInterface from "../../../entities/seeker/iSeekerAuthInteractor";
+import ISeekerAuthInterface from "../../../entities/seeker/ISeekerAuthInteractor";
 import httpStatus from "../../../entities/rules/httpStatusCodes";
+import AppError from "../../../frameworks/utils/errorInstance";
 
 //types
 import { seekerDetailsRule } from "../../../entities/rules/seekerRules";
@@ -48,25 +49,18 @@ class AuthController {
         }
     }
 
-    verifyOtpControl = async (req: Request, res: Response): Promise<any> => {
+    verifyOtpControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const {email, otp} = req.body
             if(!email || !otp){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: 'Email and Otp are required'});
+                throw new AppError('Email and Otp are required', httpStatus.BAD_REQUEST)
+
             }
             const response = await this.interactor.verifyOtp(otp, email)
-
-            if(!response.success &&
-                 (response.message === 'Invalid Otp' || response.message === 'Failed to create your account please try again')
-                ){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: response.message})
-            } else if(!response.success && response.message === 'Email already in use'){
-                return res.status(httpStatus.CONFLICT).json({status: false, message: response.message})
-            }
-           return res.status(httpStatus.OK).json({status: true, message: response.message})
+            return res.status(httpStatus.OK).json({status: true, message: response.message})
         } catch (error: any) {
             console.error('Error occur while creating account in verifyOtpControl: ', error.message)
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Internal server error occured'})
+            next(error)
         }
     }
 
@@ -123,6 +117,28 @@ class AuthController {
         } catch (error: any) {
             console.error('Error occur while login seeker at loginControl: ', error.message)
             res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Somthing went wrong please try again'})
+        }
+    }
+
+    emailVerifyControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const {email} = req.body
+            const response = await this.interactor.verifyEmail(email)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        } catch (error: any) {
+            console.error('Error occur while verifiying email for forgot password at emailVerifyControl: ', error.message)
+            next(error)
+        }
+    }
+
+    changePassowrdVerifyOtpControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const {email, otp} = req.body
+            const response = await this.interactor.otpVerificationForChangingPassword(email, otp)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        } catch (error: any) {
+            console.error('Error occur while verify OTP for changing password: ', error.message)
+            next(error)
         }
     }
 }

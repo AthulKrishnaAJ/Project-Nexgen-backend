@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 export interface IMailerInterface {
-    sendMail(email: string): Promise<{otp?: string, success: boolean}>
+    sendMail(email: string, subject?: string): Promise<{otp?: string, success: boolean}>
 }
 
 export const mailDetails = <mailConfigRule>{

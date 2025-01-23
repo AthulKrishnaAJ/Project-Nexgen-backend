@@ -1,9 +1,9 @@
 
 import ICompanyAuthInteface from "../../entities/company/ICompanyAtuhInteractor";
-import ICompanyRepository from "../../entities/iRepositories/ICompanyRepository";
+import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository";
 import { EmployerDetailsRule } from "../../entities/rules/companyRules";
 import IJwtSerivce from "../../entities/services/IJwtService";
-import { IMailerInterface } from "../../entities/services/iMailerInteractor";
+import { IMailerInterface } from "../../entities/services/IMailerInteractor";
 
 
 class CompanyAuth implements ICompanyAuthInteface {

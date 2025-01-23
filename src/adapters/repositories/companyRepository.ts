@@ -1,4 +1,4 @@
-import ICompanyRepository from "../../entities/iRepositories/ICompanyRepository";
+import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository";
 import employerModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import { EmployerDetailsRule } from "../../entities/rules/companyRules";

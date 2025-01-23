@@ -1,20 +1,25 @@
 
 //Files
-import ISeekerAuthInterface from "../../entities/seeker/iSeekerAuthInteractor";
-import ISeekerRepository from "../../entities/iRepositories/iSeekerRepository";
-import { IMailerInterface } from "../../entities/services/iMailerInteractor";
+import ISeekerAuthInterface from "../../entities/seeker/ISeekerAuthInteractor";
+import ISeekerRepository from "../../entities/IRepositories/ISeekerRepository";
+import ICommonRepository from "../../entities/IRepositories/ICommonRepository";
+import { IMailerInterface } from "../../entities/services/IMailerInteractor";
 import { seekerDetailsRule } from "../../entities/rules/seekerRules";
 import IJwtSerivce from "../../entities/services/IJwtService";
+import AppError from "../../frameworks/utils/errorInstance";
+import httpStatus from "../../entities/rules/httpStatusCodes";
 
 class UserAuth implements ISeekerAuthInterface {
     private repository: ISeekerRepository
     private mailer: IMailerInterface
     private jwtService: IJwtSerivce
+    private commonRepository: ICommonRepository
 
-    constructor(repository: ISeekerRepository, mailer: IMailerInterface, jwt: IJwtSerivce) {
+    constructor(repository: ISeekerRepository, mailer: IMailerInterface, jwt: IJwtSerivce, commonRepo: ICommonRepository) {
         this.repository = repository
         this.mailer = mailer
         this.jwtService = jwt
+        this.commonRepository = commonRepo
     }
 
     async sendOtp(userData: seekerDetailsRule): Promise<{ success: boolean, message: string }> {
@@ -26,7 +31,7 @@ class UserAuth implements ISeekerAuthInterface {
             if (!isUserExist) {
                 const mailResponse = await this.mailer.sendMail(userData.email)
                 const storeOtpAndUserData = await this.repository.tempOtp(mailResponse.otp as string, userData)
-
+                console.log('OTP>>>>>>>>>', mailResponse.otp)
                 if (mailResponse.success && storeOtpAndUserData.created) {
                     return { success: true, message: 'OTP send your email' }
                 } else {
@@ -52,24 +57,24 @@ class UserAuth implements ISeekerAuthInterface {
                 const otpVerified = await this.repository.findOtpAndSeeker(email.trim(), otp, true)
 
                 if (!otpVerified.success || !otpVerified.userData) {
-                    return { success: false, message: 'Invalid Otp' }
+                    throw new AppError('Invalid Otp', httpStatus.BAD_REQUEST)
                 }
 
                 const userCreation = await this.repository.createSeeker(otpVerified.userData)
 
                 if (!userCreation.created) {
-                    return { success: false, message: 'Failed to create your account please try again' }
+                    throw new AppError('Failed to create your account please try again', httpStatus.BAD_REQUEST)
                 }
-
                 return { success: true, message: 'Account created successful' }
+
             } else {
                 console.log('user exixiixixxi');
-                return { success: false, message: 'Email already in use' }
+                throw new AppError('Email already in use', httpStatus.CONFLICT)
             }
 
         } catch (error: any) {
             console.error('Error in verifyOtp at seekerAuth: ', error.message)
-            return { success: false, message: 'Something went wrong please try again' }
+            throw error
         }
     }
 
@@ -123,6 +128,43 @@ class UserAuth implements ISeekerAuthInterface {
         } catch (error: any) {
             console.error('Error in login at seekerAuth: ', error.message)
             return { success: false, message: 'Failed to login. Please try again' }
+        }
+    }
+
+
+    async verifyEmail(email: string): Promise<{success: boolean, message: string}> {
+        try {
+            const isSeeker = await this.repository.seekerExists(email)
+            if(!isSeeker){
+                throw new AppError('Cannot found email, Please signup', httpStatus.NOT_FOUND)
+            }
+            const mailResponse = await this.mailer.sendMail(email, 'Verification mail from Nexgen for changing your passowrd')
+            const storeOtpAndEmail = await this.commonRepository.saveOtpAndEmail(email, mailResponse.otp as string)
+
+            if(!mailResponse.success || !storeOtpAndEmail.stored){
+                throw new AppError('Something went wrong, cannot sent otp to your mail', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return {success: true, message: 'OTP sent your email'}
+        } catch (error: any) {
+            console.error('Error in verifyEmail at usecases/seekerAtuh: ', error.message)
+            throw error
+        }
+    }
+
+    async otpVerificationForChangingPassword(email: string, otp: string): Promise<{ success: boolean; message: string; }> {
+        try{
+            const otpAndEmailVerify = await this.commonRepository.verifyOtpAndEmail(email, otp)
+            if(!otpAndEmailVerify.success){
+                if(otpAndEmailVerify.message === 'Data not found' || otpAndEmailVerify.message === 'Somthing went wrong'){
+                    throw new AppError('Something went wrong, please verify the email again', httpStatus.INTERNAL_SERVER_ERROR)
+                } else {
+                    throw new AppError('Invalid OTP', httpStatus.BAD_REQUEST)
+                }
+            }
+            return {success: true, message: 'OTP verified'}
+        } catch(error: any){
+            console.error('Erron in otpVerificationForChangingPassword at usecase/seekerAuth: ', error.message)
+            throw error
         }
     }
 }

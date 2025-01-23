@@ -6,6 +6,7 @@ import morgan from 'morgan'
 //files
 import connectToDatabase from '../database/mongoDB/mongoConnection'
 import routes from './routes'
+import errorHandler from './middlewares/errorHandler'
 
 dotenv.config()
 
@@ -22,8 +23,7 @@ app.use(morgan('dev'))
 
 app.use('/api', routes)
 
-
-
+app.use(errorHandler)
 
 export default app
 

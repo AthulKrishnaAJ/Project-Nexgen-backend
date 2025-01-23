@@ -1,5 +1,5 @@
 //Files
-import iSeekerRepository from "../../entities/iRepositories/iSeekerRepository";
+import iSeekerRepository from "../../entities/IRepositories/ISeekerRepository";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import { seekerDetailsRule } from "../../entities/rules/seekerRules";
@@ -13,7 +13,6 @@ class SeekerRepository implements iSeekerRepository {
             const seekerAlreadyExist = await seekerModel.findOne({email: email})
             console.log('seeker exist: ', seekerAlreadyExist)
             if(!seekerAlreadyExist){
-                console.log('enter in false condition')
                 return false
             }
             console.log('return true afte finding seekr')

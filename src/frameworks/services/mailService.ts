@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer'
-import { mailDetails } from '../../entities/services/iMailerInteractor'
+import { mailDetails } from '../../entities/services/IMailerInteractor'
 import dotenv from 'dotenv'
 dotenv.config()
 

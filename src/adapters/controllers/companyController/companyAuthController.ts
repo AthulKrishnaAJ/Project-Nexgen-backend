@@ -76,7 +76,7 @@ class CompanyAuthController {
             console.log('Enter employer login control with email and password: ', email)
             const response = await this.interactor.login(email, password)
             if(response.success){
-                res.cookie('RefreshToken', response.refreshToken, {
+                res.cookie('employerRefreshToken', response.refreshToken, {
                     httpOnly: true,
                     secure: true,  
                     sameSite: 'none',
@@ -84,7 +84,7 @@ class CompanyAuthController {
                     path: '/employer'
                 })
 
-                res.cookie('AccessToken', response.accessToken, {
+                res.cookie('employerAccessToken', response.accessToken, {
                     httpOnly: true,
                     secure: true,
                     sameSite: 'none',
