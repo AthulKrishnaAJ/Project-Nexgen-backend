@@ -137,6 +137,38 @@ class SeekerRepository implements iSeekerRepository {
             return {success: false, message: 'Something went wrong'}
         }
     }
+
+    async findUserDataByEmail(email: string): Promise<{userData?: seekerDetailsRule, success: boolean}> {
+        try {
+            const user = await seekerModel.findOne({email: email})
+            if(!user){
+             
+                return {success: false}
+            }
+            return {userData: user, success: true}
+        } catch (error: any) {
+            console.error('Error in findUserDataByEmail at repository/seekerRepository: ', error)
+            return {success: false}
+        }
+    }
+
+    async updateField(email: string, value: string, field: string): Promise<{success: boolean, message?: string}> {
+        try {
+            const updateData = {[field]: value}
+            const result = await seekerModel.updateOne({email}, {$set: updateData})
+
+            if(result.modifiedCount === 0){
+                return {success: false, message: `No changes made`}
+            }
+
+            return {success: true, message: `${field} updated`}
+        } catch (error: any) {
+            console.error('Error in updatedField at repository/seekerRepository: ', error.message)
+            return {success: false}
+        }
+    }
+
+    
 }
 
     

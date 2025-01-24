@@ -8,6 +8,7 @@ import { seekerDetailsRule } from "../../entities/rules/seekerRules";
 import IJwtSerivce from "../../entities/services/IJwtService";
 import AppError from "../../frameworks/utils/errorInstance";
 import httpStatus from "../../entities/rules/httpStatusCodes";
+import { hashPassword } from "../../frameworks/services/passwordService";
 
 class UserAuth implements ISeekerAuthInterface {
     private repository: ISeekerRepository
@@ -163,7 +164,31 @@ class UserAuth implements ISeekerAuthInterface {
             }
             return {success: true, message: 'OTP verified'}
         } catch(error: any){
-            console.error('Erron in otpVerificationForChangingPassword at usecase/seekerAuth: ', error.message)
+            console.error('Error in otpVerificationForChangingPassword at usecase/seekerAuth: ', error.message)
+            throw error
+        }
+    }
+
+    async changePasswordCase(email: string, password: string): Promise<{success: boolean, message: string}> {
+        try {
+            const findUser = await this.repository.findUserDataByEmail(email)
+            if(!findUser.success){
+                throw new AppError('Something went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            console.log('User data at changePassword case: ', findUser)
+            const hashedPassword = await hashPassword(password)
+            const isPasswordUpdate = await this.repository.updateField(email, hashedPassword, 'password')
+
+            if(!isPasswordUpdate.success){
+                if(isPasswordUpdate.message === 'No changes made'){
+                    throw new AppError('Password already taken', httpStatus.CONFLICT)
+                } else {
+                    throw new AppError('Something went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+                }
+            }
+            return {success: isPasswordUpdate.success, message: 'Password updated successful'}
+        } catch (error: any) {
+            console.error('Error in changePasswordCase at usecase/seekerAuth: ', error.message)
             throw error
         }
     }

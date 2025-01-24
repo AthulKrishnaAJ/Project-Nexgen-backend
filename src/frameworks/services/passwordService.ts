@@ -1,4 +1,6 @@
 import bcrypt from 'bcrypt'
+import AppError from '../utils/errorInstance';
+import httpStatus from '../../entities/rules/httpStatusCodes';
 
 export const hashPassword =  async (password: string): Promise<string> => {
     try {
@@ -8,7 +10,7 @@ export const hashPassword =  async (password: string): Promise<string> => {
         return hashedPassword   
     } catch (error: any) {
         console.error('Error in hasing passwor at password service file at service: ', error.message)
-        throw new Error('Somthing went wrong')
+        throw new AppError('Somthing went wrong', httpStatus.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -23,6 +25,6 @@ export const comparePassword = async (password: string, hashedPassword: string):
         return true
     }catch(error: any){
         console.error('Error in comparing password at password services: ', error.message)
-        throw new Error('Something went wrong')
+        throw new AppError('Something went wrong', httpStatus.INTERNAL_SERVER_ERROR)
     }
 }

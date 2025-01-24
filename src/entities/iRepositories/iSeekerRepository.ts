@@ -6,5 +6,6 @@ export default interface ISeekerRepository {
     findOtpAndSeeker(email: string, otp: string | undefined, validateOtp: boolean): Promise<{success: boolean, userData?: seekerDetailsRule}>
     createSeeker(userData: seekerDetailsRule): Promise<{created: boolean}>
     loginSeeker(email: string, password: string): Promise<{user?: seekerDetailsRule, success: boolean, message: string}>
-    
+    findUserDataByEmail(email: string): Promise<{userData?: seekerDetailsRule, success: boolean}>
+    updateField(email: string, value: string, field: string): Promise<{success: boolean, message?: string}>
 }

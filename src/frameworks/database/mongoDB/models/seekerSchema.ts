@@ -34,7 +34,7 @@ const seekerSchema = new Schema<seekerDetailsRule>({
         type: Boolean,
         default: false
     }
-})
+}, {timestamps: true})
 
 
 

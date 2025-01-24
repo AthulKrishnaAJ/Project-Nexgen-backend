@@ -23,6 +23,7 @@ seekerRouter.post('/resendOtp', controller.resendOtpControl)
 seekerRouter.post('/login', controller.loginControl)
 seekerRouter.post('/emailVerify', controller.emailVerifyControl)
 seekerRouter.post('/verifyOtpForChangePassword', controller.changePassowrdVerifyOtpControl)
+seekerRouter.post('/changePassword', controller.changePasswordControl)
 
 
 export default seekerRouter

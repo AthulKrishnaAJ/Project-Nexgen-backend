@@ -141,6 +141,18 @@ class AuthController {
             next(error)
         }
     }
+
+    changePasswordControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const {email, password} = req.body
+            console.log('DAta =====> ', email, password)
+            const response = await this.interactor.changePasswordCase(email, password)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        } catch (error: any) {
+            console.error('Error occur while changing password at changePasswordControl: ', error.message)
+            next(error)
+        }
+    }
 }
 
 export default AuthController

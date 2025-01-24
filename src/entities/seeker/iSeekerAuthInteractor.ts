@@ -7,6 +7,7 @@ interface ISeekerAuthInterface {
     login(email: string, password: string): Promise<{user?: seekerDetailsRule, success: boolean, message: string, accessToken?: string, refreshToken?: string}>
     verifyEmail(email: string): Promise<{success: boolean, message: string}>
     otpVerificationForChangingPassword(email: string, otp: string): Promise<{success: boolean, message: string}>
+    changePasswordCase(email: string, password: string): Promise<{success: boolean, message: string}>
 }
 
 
