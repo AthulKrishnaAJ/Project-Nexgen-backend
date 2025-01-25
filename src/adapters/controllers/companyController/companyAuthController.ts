@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 
 //files
 import ICompanyAuthInteface from "../../../entities/company/ICompanyAtuhInteractor"
@@ -6,6 +6,7 @@ import ICompanyAuthInteface from "../../../entities/company/ICompanyAtuhInteract
 //types
 import httpStatus from "../../../entities/rules/httpStatusCodes";
 import { EmployerDetailsRule } from "../../../entities/rules/companyRules";
+
 
 class CompanyAuthController {
     private interactor: ICompanyAuthInteface
@@ -46,25 +47,14 @@ class CompanyAuthController {
     }
 
 
-    employerVerifyOtpControl = async (req: Request, res: Response): Promise<any> => {
+    employerVerifyOtpControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const {email, otp} = req.body
-            if(!email || !otp){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: 'Otp is required'});
-            }
             const response = await this.interactor.verifyOtp(otp, email)
-
-            if(!response.success &&
-                 (response.message === 'Invalid Otp' || response.message === 'Failed to create your account please try again')
-                ){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: response.message})
-            } else if(!response.success && response.message === 'Email already in use'){
-                return res.status(httpStatus.CONFLICT).json({status: false, message: response.message})
-            }
-           return res.status(httpStatus.OK).json({status: true, message: response.message})
+            return res.status(httpStatus.OK).json({status: true, message: response.message})
         } catch (error: any) {
             console.error('Error occur while creating account in verifyOtpControl: ', error.message)
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Internal server error occured'})
+            next(error)
         }
     }
 
@@ -103,6 +93,42 @@ class CompanyAuthController {
 
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Something went wrong please try again'})
 
+        }
+    }
+
+
+    employerForgotPasswordEmailVeifyControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try{
+            console.log('enetrrrrrrrr')
+            const {email} = req.body
+            const response = await this.interactor.employerVerifyEmail(email)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        }catch (error: any){
+            console.error('Error in employerForgotPasswordEmailVeifyControl at companyAuth controller: ', error.message)
+            next(error)
+        }
+    }
+
+
+    employerChangePasswordVerifyOtpControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const {email, otp} = req.body
+            const response = await this.interactor.employerOtpVerificaionForChangePasswordCase(email, otp)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        } catch (error: any) {
+            console.error('Error in employerChangePasswordVerifyOtpControl at companyAuth controller: ', error.message)
+            next(error)
+        }
+    }
+
+    employerChangePasswordControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try{
+            const {email, password} = req.body
+            const response = await this.interactor.employerChangePasswordCase(email, password)
+            return res.status(httpStatus.OK).json({status: response.success, message: response.message})
+        }catch(error: any){
+            console.error('Error in employerChangePasswordControl at companyAuth controller: ', error.message)
+            next(error)
         }
     }
 

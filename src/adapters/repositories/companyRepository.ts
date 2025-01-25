@@ -128,6 +128,21 @@ class CompanyRepository implements ICompanyRepository {
         }
     }
 
+    async employerUpdateFieldRepo(email: string, value: string, field: string): Promise<{ success: boolean; message?: string; }> {
+        try {
+            const updateData = {[field]: value}
+            const updateField = await employerModel.updateOne({email}, {$set: updateData})
+
+            if(updateField.modifiedCount === 0){
+                return {success: false}
+            }
+            return {success: true, message: `${field} updated`}
+        } catch (error: any) {
+            console.error('Error in employerUpdateFieldRepo at repository/companyRepository: ', error.message)
+            return {success: false}
+        }
+    }
+
 }
 
 export default CompanyRepository

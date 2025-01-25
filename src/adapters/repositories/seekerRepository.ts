@@ -142,7 +142,6 @@ class SeekerRepository implements iSeekerRepository {
         try {
             const user = await seekerModel.findOne({email: email})
             if(!user){
-             
                 return {success: false}
             }
             return {userData: user, success: true}

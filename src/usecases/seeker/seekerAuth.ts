@@ -171,11 +171,6 @@ class UserAuth implements ISeekerAuthInterface {
 
     async changePasswordCase(email: string, password: string): Promise<{success: boolean, message: string}> {
         try {
-            const findUser = await this.repository.findUserDataByEmail(email)
-            if(!findUser.success){
-                throw new AppError('Something went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
-            }
-            console.log('User data at changePassword case: ', findUser)
             const hashedPassword = await hashPassword(password)
             const isPasswordUpdate = await this.repository.updateField(email, hashedPassword, 'password')
 

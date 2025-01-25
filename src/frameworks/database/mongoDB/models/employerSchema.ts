@@ -31,7 +31,8 @@ const EmployerSchema = new Schema<EmployerDetailsRule>({
         type: Boolean,
         default: false
     }
-})
+}, {timestamps: true})
+
 
 const employerModel = model('Employer', EmployerSchema)
 export default employerModel
