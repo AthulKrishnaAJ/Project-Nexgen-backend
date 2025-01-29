@@ -66,7 +66,7 @@ class CompanyAuthController {
             console.log('Enter employer login control with email and password: ', email)
             const response = await this.interactor.login(email, password)
             if(response.success){
-                res.cookie('employerRefreshToken', response.refreshToken, {
+                res.cookie('companyRefreshToken', response.refreshToken, {
                     httpOnly: true,
                     secure: true,  
                     sameSite: 'none',
@@ -74,7 +74,7 @@ class CompanyAuthController {
                     path: '/employer'
                 })
 
-                res.cookie('employerAccessToken', response.accessToken, {
+                res.cookie('companyAccessToken', response.accessToken, {
                     httpOnly: true,
                     secure: true,
                     sameSite: 'none',
@@ -99,7 +99,6 @@ class CompanyAuthController {
 
     employerForgotPasswordEmailVeifyControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try{
-            console.log('enetrrrrrrrr')
             const {email} = req.body
             const response = await this.interactor.employerVerifyEmail(email)
             return res.status(httpStatus.OK).json({status: response.success, message: response.message})

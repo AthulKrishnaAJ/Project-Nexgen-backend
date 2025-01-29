@@ -2,13 +2,13 @@ import { Schema, model } from "mongoose";
 import { EmployerDetailsRule } from "../../../../entities/rules/companyRules";
 
 
-const EmployerSchema = new Schema<EmployerDetailsRule>({
-    firstName: {
+const companySchema = new Schema<EmployerDetailsRule>({
+    companyName: {
         type: String,
         required: true
     },
 
-    lastName: {
+    industry: {
         type: String,
         required: true
     },
@@ -30,9 +30,14 @@ const EmployerSchema = new Schema<EmployerDetailsRule>({
     blocked: {
         type: Boolean,
         default: false
+    },
+    verify: {
+        type: String,
+        enum: ['pending', 'accept', 'reject'],
+        default: 'pending'
     }
 }, {timestamps: true})
 
 
-const employerModel = model('Employer', EmployerSchema)
-export default employerModel
+const companyModel = model('Company', companySchema)
+export default companyModel

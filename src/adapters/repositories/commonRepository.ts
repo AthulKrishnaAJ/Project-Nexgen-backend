@@ -1,6 +1,9 @@
 
 import IcommonRepository from "../../entities/IRepositories/ICommonRepository";
+import { UserDataForAdmin, CompanyDataForAdmin } from "../../entities/rules/adminRules";
 import redisClient from "../../frameworks/database/redis/redisConnection";
+import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
+import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 
 
 class CommonRepository implements IcommonRepository{
@@ -41,6 +44,33 @@ class CommonRepository implements IcommonRepository{
         } catch (error: any) {
             console.error('Error in finding otp and email from redis at commonRepository: ', error.message)
             return {success: false, message: 'Somthing went wrong'}
+        }
+    }
+
+    async findUserById(id: string): Promise<{ userData?: UserDataForAdmin; success: boolean; }> {
+        try{
+            const user = await seekerModel.findById(id)
+            if(!user){
+                return {success: false}
+            }
+            return {userData: user, success: true}
+        }catch(error: any){
+            console.error('Error in findUserById at repository/commonRepository: ', error.message)
+            return {success: false}
+        }
+    }
+
+    async findCompanyByEmail(email: string): Promise<{companyData?: CompanyDataForAdmin, success: boolean}> {
+        try {
+            const company = await companyModel.findOne({email: email})
+            if(!company){
+                return {success: false}
+            }
+            return {companyData: company, success: true}
+        } catch (error: any) {
+            console.error('Error in findCompanyByEmail at repository/commonRepository: ', error.message)
+            return {success: false}
+            
         }
     }
 

@@ -3,10 +3,11 @@ import { Types } from "mongoose";
 
 export interface EmployerDetailsRule {
     id?: Types.ObjectId;
-    firstName: string;
-    lastName: string;
+    companyName: string;
+    industry: string;
     email: string;
     mobile: string;
     password?: string;
     blocked?:boolean
+    verify?: string
 }

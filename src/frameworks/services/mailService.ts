@@ -82,8 +82,8 @@ const mailService = async (email: string, otp?: string, subject?: string, text?:
                                 Nexgen
                             </div>
                         <div class='content'>
-                            <h3>Hello User,</h3>
-                            <p>${otp ? 'Use the OTP below to complete your process': info.text}</p>
+                            <h2>Hello User,</h2>
+                            <h3>${otp ? 'Use the OTP below to complete your process': info.text}</h3>
                             ${otp ? `<div class='otp-box'>${otp}</div>` : ''}
                             <p>Thank you for using Nexgen!</p>
                         </div>

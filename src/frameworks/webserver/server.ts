@@ -1,5 +1,4 @@
 import express from 'express'
-import dotenv from 'dotenv'
 import cors from 'cors'
 import morgan from 'morgan'
 
@@ -8,13 +7,12 @@ import connectToDatabase from '../database/mongoDB/mongoConnection'
 import routes from './routes'
 import errorHandler from './middlewares/errorHandler'
 
-dotenv.config()
 
 const app = express()
 
 connectToDatabase()
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+app.use(cors({ origin: ['http://localhost:5173', 'https://5845-103-214-235-16.ngrok-free.app'], credentials: true }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 

@@ -9,6 +9,13 @@ class Mailer implements IMailerInterface {
         const response = await mailService(email, otp, subject)
         return {otp: otp, success: response.success}
     }
+
+
+    async sendMailToClients(email: string, reason?: string): Promise<boolean> {
+        const text = reason ? reason : 'Your account has been verified'
+        const response = await mailService(email, undefined, undefined, text)
+       return response.success
+    }
 }
 
 export default Mailer

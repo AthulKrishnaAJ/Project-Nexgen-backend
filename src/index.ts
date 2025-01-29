@@ -1,7 +1,10 @@
+import dotenv from 'dotenv'
 import app from "./frameworks/webserver/server";
 import net from 'net';
 
-const PORT = process.env.PORT || 9009;
+dotenv.config()
+
+const PORT = process.env.PORT;
 
 // Check if the port is already in use
 const server = net.createServer();

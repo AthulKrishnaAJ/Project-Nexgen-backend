@@ -1,5 +1,5 @@
 import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository";
-import employerModel from "../../frameworks/database/mongoDB/models/employerSchema";
+import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import { EmployerDetailsRule } from "../../entities/rules/companyRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
@@ -8,7 +8,7 @@ class CompanyRepository implements ICompanyRepository {
 
     async employerExists(email: string): Promise<boolean> {
         try {
-            const employerAlreadyExist = await employerModel.findOne({email: email})
+            const employerAlreadyExist = await companyModel.findOne({email: email})
             console.log('employer exist: ', employerAlreadyExist)
             if(!employerAlreadyExist){
                 console.log('enter in false condition')
@@ -22,16 +22,16 @@ class CompanyRepository implements ICompanyRepository {
         }
     }
 
-    async tempOtp(otp: string, userData: EmployerDetailsRule):Promise<{ created: boolean }> {
+    async tempOtp(otp: string, employerData: EmployerDetailsRule):Promise<{ created: boolean }> {
         try{
             const expirationTime = 120
             
             const dataToStore = {
                 otp,
-                userData
+                employerData
             }
 
-            await redisClient.set(userData.email, JSON.stringify(dataToStore), {
+            await redisClient.set(employerData.email, JSON.stringify(dataToStore), {
                 EX: expirationTime
             });
             console.log('Storing OTP and user data in redis')
@@ -51,39 +51,39 @@ class CompanyRepository implements ICompanyRepository {
                 return {success: false}
             }
       
-            const {otp: storedOtp, userData} = JSON.parse(data)
+            const {otp: storedOtp, employerData} = JSON.parse(data)
 
             if(validateOtp){
-                if(storedOtp === otp && userData.email === email){
+                if(storedOtp === otp && employerData.email === email){
                     console.log('Otp and email matched')
-                    return {success: true, userData: userData}
+                    return {success: true, userData: employerData}
                 }
                 console.log('Otp or email does not match')
                 return {success: false}
             }
 
-            if(userData.email !== email){
+            if(employerData.email !== email){
                 console.log('Email not matched in findOtpAndSeeker at seeker repository')
                 return {success: false}
             }
 
             console.log("Returning use data without validating otp in findOtpAndSeeker at seeker repository")
-            return {success: true, userData: userData}
+            return {success: true, userData: employerData}
         } catch (error: any) {
             console.error('Error in finding user at seeker repository: ', error.message)
             return {success: false}
         }
     }
 
-    async createEmployer(userData: EmployerDetailsRule): Promise<{created: boolean}> {
+    async createEmployer(companyData: EmployerDetailsRule): Promise<{created: boolean}> {
         try{
-            const hashedPassword = await hashPassword(userData.password as string)
+            const hashedPassword = await hashPassword(companyData.password as string)
        
-            const newSeeker = await employerModel.create({
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                email: userData.email,
-                mobile: userData.mobile,
+            const newSeeker = await companyModel.create({
+                companyName: companyData.companyName,
+                industry: companyData.industry,
+                email: companyData.email,
+                mobile: companyData.mobile,
                 password: hashedPassword
             })
             console.log('User created successfully: ', newSeeker)
@@ -100,7 +100,7 @@ class CompanyRepository implements ICompanyRepository {
 
     async employerLoginRepo(email: string, password: string): Promise<{ userData?: EmployerDetailsRule; success: boolean; message: string; }> {
         try {
-            const findEmployer = await employerModel.findOne({email: email})
+            const findEmployer = await companyModel.findOne({email: email})
             if(!findEmployer){
                 return {success: false, message: 'Incorrect email'}
             }
@@ -115,8 +115,8 @@ class CompanyRepository implements ICompanyRepository {
             }
             const user: EmployerDetailsRule = {
                 id: findEmployer._id,
-                firstName: findEmployer.firstName,
-                lastName: findEmployer.lastName,
+                companyName: findEmployer.companyName,
+                industry: findEmployer.industry,
                 email: findEmployer.email,
                 mobile: findEmployer.mobile,
                 blocked: findEmployer.blocked
@@ -131,7 +131,7 @@ class CompanyRepository implements ICompanyRepository {
     async employerUpdateFieldRepo(email: string, value: string, field: string): Promise<{ success: boolean; message?: string; }> {
         try {
             const updateData = {[field]: value}
-            const updateField = await employerModel.updateOne({email}, {$set: updateData})
+            const updateField = await companyModel.updateOne({email}, {$set: updateData})
 
             if(updateField.modifiedCount === 0){
                 return {success: false}
