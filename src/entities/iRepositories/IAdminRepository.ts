@@ -5,7 +5,7 @@ interface IAdminRepository {
     getAllUsersRepo(projection: Record<string, number>): Promise<{userData?: UserDataForAdmin[], success: boolean}>
     findUserAndUpdate(id: string, field: string, value: any, projection?: Record<string, number>): Promise<{ userData?: UserDataForAdmin; success: boolean; }>
     getAllCompaniesRepo(projection: Record<string, number>): Promise<{companiesData?: CompanyDataForAdmin[], success: boolean}>
-    findCompanyByIdAndUpdate(id: string, field: string, value: any, projection: Record<string, number>): Promise<{companyData?: CompanyDataForAdmin; success: boolean}>
+    findCompanyByIdAndUpdate(id: string, updatedData: any, projection: Record<string, number>): Promise<{companyData?: CompanyDataForAdmin; success: boolean}>
 }
 
 

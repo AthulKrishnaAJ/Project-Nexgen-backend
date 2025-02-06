@@ -7,5 +7,6 @@ interface ICompanyAuthInteface {
     employerVerifyEmail(email: string): Promise<{success: boolean, message: string}>
     employerOtpVerificaionForChangePasswordCase(email: string, otp: string): Promise<{success: boolean, message: string}>
     employerChangePasswordCase(email: string, passowrd: string): Promise<{success: boolean, message: string}>
+    handleCompanyVerificationStateCase(company: EmployerDetailsRule): Promise<{success: boolean, message: string}>;
 }
 export default ICompanyAuthInteface

@@ -15,7 +15,7 @@ class CompanyAuthController {
         this.interactor = interactor
     }
 
-    employerSendOtpControl = async (req: Request, res: Response): Promise<any> => {
+    employerSendOtpControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const employerData: EmployerDetailsRule = req.body
             console.log('user data: ',  employerData)
@@ -23,26 +23,13 @@ class CompanyAuthController {
             if(!employerData.email){
                 return res.status(httpStatus.BAD_REQUEST).json({success: false, message: 'Email is required'})
             }
-
             const response = await this.interactor.sendOtp(employerData)
-    
             if(response.success){
-                return res.status(httpStatus.OK).json({success: true, message: response.message})
+                return res.status(httpStatus.OK).json({success: response.success, message: response.message})
             }
-
-            if(!response.success && response.message === 'Email already in use'){
-                return res.status(httpStatus.CONFLICT).json({success: false, message: response.message})
-            }
-
-            if(!response.success && response.message === 'Something went wrong, cannot send otp to your mail'){
-                return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({success: false, message: response.message})
-            }
-
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({success: false, message: 'An unknown error, please try again'})
-
         } catch (error: any) {
             console.error('Error in sendOtpControl: ', error.message)
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({success: false, message: 'Internal server error occured'})
+            next(error)
         }
     }
 
@@ -59,11 +46,10 @@ class CompanyAuthController {
     }
 
 
-    employerLoginControl = async (req: Request, res: Response): Promise<any> => {
+    employerLoginControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const {email, password} = req.body
 
-            console.log('Enter employer login control with email and password: ', email)
             const response = await this.interactor.login(email, password)
             if(response.success){
                 res.cookie('companyRefreshToken', response.refreshToken, {
@@ -86,12 +72,7 @@ class CompanyAuthController {
             }
         } catch (error: any) {
             console.error('Error in employerLogin control at company auth controller: ', error)
-            const {message} = error
-            if(message === 'Invalid email or password, Please try again' || message === 'Access denied. Your account is blocked'){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: message})
-            }
-
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Something went wrong please try again'})
+            next(error)
 
         }
     }

@@ -35,6 +35,16 @@ const companySchema = new Schema<EmployerDetailsRule>({
         type: String,
         enum: ['pending', 'accept', 'reject'],
         default: 'pending'
+    },
+    rejection: {
+        expiryDate: {
+            type: Date,
+            default: null
+        },
+        reason: {
+            type: String,
+            default: null
+        }
     }
 }, {timestamps: true})
 

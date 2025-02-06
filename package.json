@@ -1,10 +1,10 @@
 {
   "name": "nexgen-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "npx kill-port 9009 && nodemon index.ts",
-    "dev": "npx kill-port 9009 && nodemon index.js"
+    "start": "npx kill-port 9009 && ts-node ./src/index.ts",
+    "dev": "npx kill-port 9009 && nodemon --config nodemon.json"
   },
   "keywords": [],
   "author": "",

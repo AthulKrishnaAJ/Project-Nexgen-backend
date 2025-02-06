@@ -2,12 +2,16 @@ import { Types } from "mongoose";
 
 
 export interface EmployerDetailsRule {
-    id?: Types.ObjectId;
+    _id?: Types.ObjectId;
     companyName: string;
     industry: string;
     email: string;
     mobile: string;
     password?: string;
-    blocked?:boolean
+    blocked?: boolean
     verify?: string
+    rejection?: {
+        expiryDate: Date;
+        reason: string;
+    }
 }
