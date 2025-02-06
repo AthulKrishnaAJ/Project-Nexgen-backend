@@ -31,6 +31,10 @@ export interface CompanyDataForAdmin {
     mobile?: string;
     blocked?: boolean;
     verify?: string;
+    rejection?:{
+        reason: string,
+        expiryDate: Date
+    }
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -40,5 +44,16 @@ export const companyProjectionData = {
     industry: 1,
     email: 1,
     blocked: 1,
-    verify: 1
+    verify: 1,
+    rejection: 1
+}
+
+interface RejectionInfo {
+    reason: string | null;
+    expiryDate: Date | null
+}
+
+export interface CompanyVerifyData {
+    verify: string
+    rejection?: RejectionInfo
 }

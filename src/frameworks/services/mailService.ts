@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 import { mailDetails } from '../../entities/services/IMailerInteractor'
-import dotenv from 'dotenv'
-dotenv.config()
+// import dotenv from 'dotenv'
+// dotenv.config()
 
 
 const mailService = async (email: string, otp?: string, subject?: string, text?: string): Promise<{success: boolean}> => {

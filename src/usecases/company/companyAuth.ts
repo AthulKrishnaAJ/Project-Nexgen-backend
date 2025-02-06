@@ -26,50 +26,96 @@ class CompanyAuth implements ICompanyAuthInteface {
    async sendOtp(employerData: EmployerDetailsRule): Promise<{ success: boolean; message: string; }> {
         try {
 
-            const isEmployerExist = await this.repository.employerExists(employerData.email.trim())
+            const isEmployerExist = await this.repository.companyExists(employerData.email.trim())
 
-            if (!isEmployerExist) {
+            if (!isEmployerExist.success) {
                 const mailResponse = await this.mailer.sendMail(employerData.email)
                 const storeOtpAndUserData = await this.repository.tempOtp(mailResponse.otp as string, employerData)
 
                 if (mailResponse.success && storeOtpAndUserData.created) {
-                    return { success: true, message: 'OTP send your email' }
+                    return { success: true, message: 'OTP send to your email' }
                 } else {
-                    return { success: false, message: 'Something went wrong, cannot send otp to your mail' }
+                    throw new AppError('Something went wrong, cannot send otp to your mail', httpStatus.INTERNAL_SERVER_ERROR)
                 }
 
             } else {
                 console.log('Employer exist')
-                return { success: false, message: 'Email already in use' }
+                const companyVerification = await this.handleCompanyVerificationStateCase(isEmployerExist.companyData as EmployerDetailsRule)
+                return {success: companyVerification.success, message: companyVerification.message}
             }
         } catch (error: any) {
             console.error('Error in sendOtp: ', error.message)
-            return { success: false, message: 'Internal server error occur' }
+            throw error
+        }
+
+    }
+
+
+    async handleCompanyVerificationStateCase(company: EmployerDetailsRule): Promise<{success: boolean, message: string}> {
+        try {
+            if(company.verify === 'reject' && company.rejection?.expiryDate){
+                const endDate = new Date(company.rejection.expiryDate)
+       
+                const currentDate = new Date()
+                // currentDate.setMonth(currentDate.getMonth() + 8)
+                if(currentDate < endDate){
+                    const remainingDays = Math.ceil((endDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+                    throw new AppError(`Company has been rejected, Signup after ${remainingDays} days`, httpStatus.BAD_REQUEST)
+                } else {
+                    const mailResponse = await this.mailer.sendMail(company.email)
+                    const storeOtpAndUserData = await this.repository.tempOtp(mailResponse.otp as string, company)
+
+                    if (mailResponse.success && storeOtpAndUserData.created) {
+                        return { success: true, message: 'Verification OTP send to your email' }
+                    } else {
+                        throw new AppError('Something went wrong, cannot send otp to your mail', httpStatus.INTERNAL_SERVER_ERROR)
+                    }
+                }
+            }
+            throw new AppError('Email already in use', httpStatus.CONFLICT)
+        } catch (error: any) {
+            console.error('Error in handleCompanyVerificationState at companyRepository: ', error.message)
+            throw error
         }
     }
 
 
-    async verifyOtp(otp: string, email: string): Promise<{ success: boolean; message: string; }> {
+
+    async verifyOtp(otp: string, email: string): Promise<{success: boolean, message: string}> {
         try {
-            const isUserExist = await this.repository.employerExists(email.trim())
+            const isUserExist = await this.repository.companyExists(email.trim())
 
-            if (!isUserExist) {
+            const otpVerified = await this.repository.findOtpAndCompany(email, otp, true)
+            if (!otpVerified.success || !otpVerified.userData) {
+                throw new AppError('Invalid Otp', httpStatus.BAD_REQUEST)
+            }
+
+            if (!isUserExist.success) {
                 console.log('user not exixiixix')
-                const otpVerified = await this.repository.findOtpAndEmployer(email, otp, true)
-
-                if (!otpVerified.success || !otpVerified.userData) {
-                    throw new AppError('Invalid Otp', httpStatus.BAD_REQUEST)
-                }
-
-                const userCreation = await this.repository.createEmployer(otpVerified.userData)
-
+                const userCreation = await this.repository.createCompany(otpVerified.userData)
                 if (!userCreation.created) {
                     throw new AppError('Failed to create your account please try again', httpStatus.BAD_REQUEST)
                 }
+
                 return { success: true, message: 'Account created successful' }
             } else {
                 console.log('user exixiixixxi');
-                throw new AppError('Email already in use', httpStatus.CONFLICT)
+                if(isUserExist?.companyData?.verify === 'reject'){
+                    let updatedData = {
+                        verify: 'pending',
+                        rejection: {    
+                            reason: null,
+                            expiryDate: null
+                        }
+                    }
+                    const rejectedCompany = await this.repository.companyUpdateFieldByIdRepo(isUserExist.companyData._id!.toString(), updatedData)
+                    if(!rejectedCompany.success){
+                        throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+                    }
+                    return {success: true, message: 'Account verified'}
+                }
+                throw new AppError('Somthing went wrong while verifying your account', httpStatus.INTERNAL_SERVER_ERROR)
+                
             }
 
         } catch (error: any) {
@@ -81,20 +127,18 @@ class CompanyAuth implements ICompanyAuthInteface {
 
     async login(email: string, password: string): Promise<{userData?: EmployerDetailsRule, refreshToken?: string, accessToken?: string, success: boolean, message: string}> {
         try {
-            const validEmployer = await this.repository.employerLoginRepo(email, password)
+            const validEmployer = await this.repository.companyLoginRepo(email, password)
 
             if(!validEmployer.success){
                 if(validEmployer.message === 'Incorrect email' || validEmployer.message === 'Incorrect password'){
-                    throw new Error('Invalid email or password, Please try again')
+                    throw new AppError('Invalid email or password, Please try again', httpStatus.BAD_REQUEST)
                 }
-
-                if(validEmployer.message === 'Access denied. Your account is blocked'){
-                    throw new Error(validEmployer.message)
-                }
+                throw new AppError(validEmployer.message, httpStatus.FORBIDDEN)
+             
             }
 
-            const accessToken = this.jwtService.generateAccessToken({id: validEmployer.userData?.id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1hr'})
-            const refreshToken = this.jwtService.generateRefreshToken({id: validEmployer.userData?.id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1d'})
+            const accessToken = this.jwtService.generateAccessToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1hr'})
+            const refreshToken = this.jwtService.generateRefreshToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1d'})
 
             return {
                 userData: validEmployer.userData, success: true, message: 'Login successful',
@@ -109,7 +153,7 @@ class CompanyAuth implements ICompanyAuthInteface {
     async employerVerifyEmail(email: string): Promise<{success: boolean, message: string}>{
         try {
             console.log('enter the case')
-            const isEmployer = await this.repository.employerExists(email)
+            const isEmployer = await this.repository.companyExists(email)
             if(!isEmployer){
                 throw new AppError('Cannot found email, Please signup', httpStatus.NOT_FOUND)
             }
@@ -147,7 +191,7 @@ class CompanyAuth implements ICompanyAuthInteface {
     async employerChangePasswordCase(email: string, passowrd: string): Promise<{success: boolean, message: string}> {
         try {
             const hashedPassword = await hashPassword(passowrd)
-            const isPasswordUpdate = await this.repository.employerUpdateFieldRepo(email, hashedPassword, 'password')
+            const isPasswordUpdate = await this.repository.companyUpdateFieldByEmailRepo(email, hashedPassword, 'password')
             
             if(!isPasswordUpdate.success){
                 throw new AppError('Something went wrong, Please try again', httpStatus.INTERNAL_SERVER_ERROR)

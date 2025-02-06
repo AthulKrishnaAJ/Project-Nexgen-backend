@@ -2,8 +2,8 @@ import { createClient, RedisClientType } from "redis";
 
 let redisClient: RedisClientType = createClient({
   socket: {
-    host: "127.0.0.1",
-    port: 6379, 
+    host: process.env.REDIS_SOCKET_HOST || '127.0.0.1',
+    port: process.env.REDIS_SOCKET_PORT ? parseInt(process.env.REDIS_SOCKET_PORT) : 6379
   },
 });
 

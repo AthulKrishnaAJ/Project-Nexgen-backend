@@ -6,9 +6,10 @@ enum httpStatus {
     FORBIDDEN = 403,
     NOT_FOUND = 404,
     CONFLICT = 409,
-    Unprocessable_Entity =  422,
+    UNPROCESSABLE_ENTITY =  422,
     INTERNAL_SERVER_ERROR = 500,
-    NO_CONTENT = 204
+    NO_CONTENT = 204,
+    NOT_MODIFIED = 304
 }
 
 export default httpStatus

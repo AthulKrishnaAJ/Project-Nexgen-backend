@@ -58,7 +58,7 @@ class AdminRepository implements IAdminRepository {
 
     async getAllCompaniesRepo(projection: Record<string, number>): Promise<{ companiesData?: CompanyDataForAdmin[]; success: boolean; }> {
         try {
-            const allCompanies = await companyModel.find({}, projection).lean()
+            const allCompanies = await companyModel.find({}, projection).sort({createdAt: -1}).lean()
             if(!allCompanies || allCompanies.length === 0){
                 return {success: false}
             }
@@ -69,11 +69,11 @@ class AdminRepository implements IAdminRepository {
             
         }
     }
-    async findCompanyByIdAndUpdate(id: string, field: string, value: any, projection: Record<string, number>): Promise<{companyData?: CompanyDataForAdmin; success: boolean}> {
+    async findCompanyByIdAndUpdate(id: string, updatedData: any, projection: Record<string, number>): Promise<{companyData?: CompanyDataForAdmin; success: boolean}> {
         try {
             const updatedCompany = await companyModel.findByIdAndUpdate(
                 id,
-                {[field]: value},
+                updatedData,
                 {new: true, projection}
             )
             if(!updatedCompany){

@@ -4,7 +4,7 @@ import morgan from 'morgan'
 
 //files
 import connectToDatabase from '../database/mongoDB/mongoConnection'
-import routes from './routes'
+import router from './routes/index'
 import errorHandler from './middlewares/errorHandler'
 
 
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(morgan('dev'))
 
-app.use('/api', routes)
+app.use('/api', router)
 
 app.use(errorHandler)
 
