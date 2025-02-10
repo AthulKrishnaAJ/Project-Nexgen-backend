@@ -8,5 +8,7 @@ export interface seekerDetailsRule {
     mobile: string;
     password?: string;
     blocked?: boolean
-    logo?: string
+    logo?: string;
+    accessToken?: string
+    role?: string
 }

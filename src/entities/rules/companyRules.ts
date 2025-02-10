@@ -14,4 +14,7 @@ export interface EmployerDetailsRule {
         expiryDate: Date;
         reason: string;
     }
+    accessToken?: string;
+    role?: string;
+   
 }

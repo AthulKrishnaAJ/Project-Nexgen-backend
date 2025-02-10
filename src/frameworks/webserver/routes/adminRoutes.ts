@@ -5,6 +5,7 @@ import AdminRepository from '../../../adapters/repositories/adminRepository'
 import CommonRepository from '../../../adapters/repositories/commonRepository'
 import JwtService from '../../services/jwt'
 import Mailer from '../../services/mailer'
+import authMiddleware from '../middlewares/roleAuthorization'
 
 
 import AdminSeekerController from '../../../adapters/controllers/adminController/adminSeekerController'
@@ -24,11 +25,10 @@ const jwtService = new JwtService()
 const adminAuth = new AdminAuth(adminRepository, jwtService)
 const authController = new AdminAuthController(adminAuth)
 
-
 const commonRespository = new CommonRepository()
+
 const adminSeeker = new AdminSeeker(adminRepository, commonRespository)
 const seekerController = new AdminSeekerController(adminSeeker)
-
 
 const adminCompany = new AdminCompany(adminRepository, commonRespository, mailer)
 const companyController = new AdminCompanyController(adminCompany)
@@ -40,13 +40,13 @@ adminRouter.post('/login', authController.adminLoginControl)
 
 
 //User controller
-adminRouter.get('/getAllSeekers', seekerController.getAllUserControl)
-adminRouter.post('/blockUnblockSeeker', seekerController.usersBlockUnblockControl)
+adminRouter.get('/getAllSeekers', authMiddleware('admin', jwtService), seekerController.getAllUserControl)
+adminRouter.post('/blockUnblockSeeker', authMiddleware('admin', jwtService), seekerController.usersBlockUnblockControl)
 
 
 //Company controller
-adminRouter.get('/getAllCompanies', companyController.getAllCompaniesControl)
-adminRouter.post('/companyVerification', companyController.comapnyVerificationControl)
+adminRouter.get('/getAllCompanies', authMiddleware('admin', jwtService), companyController.getAllCompaniesControl)
+adminRouter.post('/companyVerification', authMiddleware('admin', jwtService), companyController.comapnyVerificationControl)
 
 
 

@@ -12,6 +12,4 @@ router.use('/company', companyRouter)
 router.use('/admin', adminRouter)
 
 
-
-
 export default router

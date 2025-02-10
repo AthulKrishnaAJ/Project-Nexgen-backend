@@ -104,7 +104,7 @@ class UserAuth implements ISeekerAuthInterface {
         }
     }
 
-    async login(email: string, password: string): Promise<{ user?: seekerDetailsRule, success: boolean, message: string, accessToken?: string, refreshToken?: string }> {
+    async login(email: string, password: string): Promise<{ user?: seekerDetailsRule, success: boolean, message: string, seekerRefreshToken?: string }> {
         try {
             const validUser = await this.repository.loginSeeker(email, password)
 
@@ -119,11 +119,15 @@ class UserAuth implements ISeekerAuthInterface {
             }
             const accessToken = this.jwtService.generateAccessToken({ id: validUser.user?.id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1hr' })
             const refreshToken = this.jwtService.generateRefreshToken({ id: validUser.user?.id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1d' })
-
-
+        
+            if(validUser.user){
+                validUser.user.accessToken = accessToken
+                validUser.user.role = 'user'
+            }
+       
             return {
                  user: validUser.user, success: true, message: 'Login successful',
-                 accessToken: accessToken, refreshToken: refreshToken 
+                 seekerRefreshToken: refreshToken 
                 }
 
         } catch (error: any) {

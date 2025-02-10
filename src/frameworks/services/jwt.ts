@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import  IJwtSerivce  from '../../entities/services/IJwtService'
 
 
+
 class JwtService implements IJwtSerivce {
     private accessKey: string
     private refresKey: string
@@ -20,6 +21,39 @@ class JwtService implements IJwtSerivce {
         const refreshToken = jwt.sign(payload, this.refresKey, options)
         return refreshToken
     }
+
+     verifyToken(token: string): {success: boolean, verifyToken?: any} {
+        try {
+            const verifyToken = jwt.verify(token, this.accessKey)
+            if(!verifyToken){
+                return {success: false}
+            }
+            return {success: true, verifyToken}
+
+        } catch (error: any) {
+            console.error('Error in access token verification: ', error)
+            return {success: false}
+        }
+    }
+
+    verifyRefreshToken(token: string): {success: boolean, verifyToken?: any} {
+        try {
+            const verifyToken = jwt.verify(token, this.refresKey)
+            if(!verifyToken){
+                return {success: false}
+            }
+            return {success: true, verifyToken}
+
+        } catch (error: any) {
+            console.error('Error in refresh token verification: ', error)
+            return {success: false}
+        }
+    }
+
+
+    
+
+ 
 }
 
 export default JwtService

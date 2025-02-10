@@ -125,7 +125,7 @@ class CompanyAuth implements ICompanyAuthInteface {
     }
 
 
-    async login(email: string, password: string): Promise<{userData?: EmployerDetailsRule, refreshToken?: string, accessToken?: string, success: boolean, message: string}> {
+    async login(email: string, password: string): Promise<{userData?: EmployerDetailsRule, companyRefreshToken?: string, success: boolean, message: string}> {
         try {
             const validEmployer = await this.repository.companyLoginRepo(email, password)
 
@@ -137,18 +137,24 @@ class CompanyAuth implements ICompanyAuthInteface {
              
             }
 
-            const accessToken = this.jwtService.generateAccessToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1hr'})
-            const refreshToken = this.jwtService.generateRefreshToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'employer'}, {expiresIn: '1d'})
+            const accessToken = this.jwtService.generateAccessToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'company'}, {expiresIn: '1hr'})
+            const refreshToken = this.jwtService.generateRefreshToken({id: validEmployer.userData?._id, email: validEmployer.userData?.email, role: 'company'}, {expiresIn: '1d'})
 
+            if(validEmployer.userData){
+                validEmployer.userData.accessToken = accessToken
+                validEmployer.userData.role = 'company'
+            }
             return {
                 userData: validEmployer.userData, success: true, message: 'Login successful',
-                accessToken: accessToken, refreshToken: refreshToken
+                companyRefreshToken: refreshToken
             }
         } catch (error: any) {
             console.error('An error occured in login at companyAuth: ', error.message)
             throw error
         }
     }
+
+
 
     async employerVerifyEmail(email: string): Promise<{success: boolean, message: string}>{
         try {

@@ -1,4 +1,5 @@
 import express from 'express'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import morgan from 'morgan'
 
@@ -12,7 +13,8 @@ const app = express()
 
 connectToDatabase()
 
-app.use(cors({ origin: ['http://localhost:5173', 'https://5845-103-214-235-16.ngrok-free.app'], credentials: true }))
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }))
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
