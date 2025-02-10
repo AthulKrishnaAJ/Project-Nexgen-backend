@@ -52,22 +52,16 @@ class CompanyAuthController {
 
             const response = await this.interactor.login(email, password)
             if(response.success){
-                res.cookie('companyRefreshToken', response.refreshToken, {
+                res.cookie('refreshToken', response.companyRefreshToken, {
                     httpOnly: true,
-                    secure: true,  
-                    sameSite: 'none',
-                    maxAge: 7 * 24 * 60 * 60 * 1000,
-                    path: '/employer'
+                    secure: process.env.NODE_ENV === 'production',  
+                    sameSite: 'lax',
+                    maxAge: 24 * 60 * 60 * 1000,
+                    path: '/'
+                
                 })
 
-                res.cookie('companyAccessToken', response.accessToken, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'none',
-                    maxAge: 15 * 60 * 1000,
-                    path: '/employer'
-                })
-
+      
              return res.status(httpStatus.OK).json({employerData: response.userData, status: true, message: response.message})
             }
         } catch (error: any) {

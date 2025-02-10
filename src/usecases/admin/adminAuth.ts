@@ -3,6 +3,7 @@ import IAdminRepository from "../../entities/IRepositories/IAdminRepository";
 import httpStatus from "../../entities/rules/httpStatusCodes";
 import AppError from "../../frameworks/utils/errorInstance";
 import IJwtSerivce from "../../entities/services/IJwtService";
+import { AdminLoginData } from "../../entities/rules/adminRules";
 
 class AdminAuth implements IAdminAuthInterface{
     private repository: IAdminRepository
@@ -12,7 +13,7 @@ class AdminAuth implements IAdminAuthInterface{
         this.jwtService = jwt
     }
 
-    async adminLoginCase(email: string, password: string): Promise<{adminData?: string, success: boolean, message: string, adminAccessToken?: string, adminRefreshToken?: string}> {
+    async adminLoginCase(email: string, password: string): Promise<{adminData?: AdminLoginData, success: boolean, message: string, adminRefreshToken?: string}> {
         try{
             const isValidAdmin = await this.repository.adminValidEmailAndPasswordRepo(email, password)
             if(!isValidAdmin){
@@ -20,9 +21,19 @@ class AdminAuth implements IAdminAuthInterface{
             }
             const accessToken = this.jwtService.generateAccessToken({email: email, role: 'admin'}, {expiresIn: '1hr'})
             const refreshToken = this.jwtService.generateRefreshToken({email: email, role: 'admin'}, {expiresIn: '1d'})
+
+            const data = {
+                email: email,
+                role: 'admin',
+                accessToken: accessToken,
+                
+            }
+
             return {
-                adminData: email, success: true, message: 'Login successful',
-                adminAccessToken: accessToken, adminRefreshToken: refreshToken
+                adminData: data,
+                success: true,
+                message: 'Login successful',
+                adminRefreshToken: refreshToken
             }
         }catch(error: any){
             console.error('Error in adminLoginCase at usecase/adminAuth: ', error.message)

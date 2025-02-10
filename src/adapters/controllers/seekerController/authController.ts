@@ -98,20 +98,14 @@ class AuthController {
             if(!response.success){
                 return res.status(httpStatus.BAD_REQUEST).json({status: false, message: response.message})
             } else {
-                res.cookie('RefreshToken', response.refreshToken,{
+                res.cookie('refreshToken', response.seekerRefreshToken,{
                     httpOnly: true,
-                    secure: true,
-                    sameSite: 'none',
-                    maxAge: 7 * 24 * 60 * 60 * 1000,
-                    path:'/'
+                    secure: process.env.NODE_ENV === 'production',  
+                    sameSite: 'lax',
+                    maxAge: 24 * 60 * 60 * 1000,
+                    path: '/'
                 })
-                res.cookie('AccessToken', response.accessToken,{
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: "none",
-                    maxAge: 15 * 60 * 1000,
-                    path: '/',
-                })
+                
                 return res.status(httpStatus.OK).json({user: response.user, status: true, message: response.message})
             }
         } catch (error: any) {

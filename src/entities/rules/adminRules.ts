@@ -57,3 +57,11 @@ export interface CompanyVerifyData {
     verify: string
     rejection?: RejectionInfo
 }
+
+
+export interface AdminLoginData {
+    email: string;
+    role: string
+    accessToken: string;
+
+}
