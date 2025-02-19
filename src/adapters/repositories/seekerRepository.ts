@@ -1,8 +1,8 @@
 //Files
-import iSeekerRepository from "../../entities/IRepositories/ISeekerRepository";
+import iSeekerRepository from "../../entities/IRepositories/iSeekerRepository";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
-import { seekerDetailsRule } from "../../entities/rules/seekerRules";
+import { seekerDetailsRule, SeekerEditProfileRule, SeekerFetchingDetailsRule } from "../../entities/rules/seekerRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
 
 
@@ -34,7 +34,7 @@ class SeekerRepository implements iSeekerRepository {
                 userData
             }
 
-            await redisClient.set(userData.email, JSON.stringify(dataToStore), {
+            await redisClient.set(userData.email as string, JSON.stringify(dataToStore), {
                 EX: expirationTime
             });
             console.log('Storing OTP and employer data in redis')
@@ -120,12 +120,11 @@ class SeekerRepository implements iSeekerRepository {
             }
 
             const user:seekerDetailsRule = {
-                id: findUser._id,
+                _id: findUser._id,
                 firstName: findUser.firstName,
                 lastName: findUser.lastName,
                 email: findUser.email,
                 mobile: findUser.mobile,
-                logo: findUser.logo,
                 blocked: findUser.blocked
             }
 
@@ -164,6 +163,34 @@ class SeekerRepository implements iSeekerRepository {
         } catch (error: any) {
             console.error('Error in updatedField at repository/seekerRepository: ', error.message)
             return {success: false}
+        }
+    }
+
+    async updateSeekerDataById(seekerId: string, seekerData: SeekerEditProfileRule): Promise<boolean> {
+        try {
+            const result = await seekerModel.updateOne({_id: seekerId}, {$set: seekerData})
+            console.log('REsult in updateSeeker: ', result)
+            if(result.modifiedCount === 0){
+                return false
+            }
+            return true
+        } catch (error: any) {
+            console.error('Error in updateSeekerDataById at repository/seekerRepository: ', error.message)
+            return false
+        }
+    }
+
+    async getSeekerDetails(seekerId: string): Promise<{success: boolean, seeker?: seekerDetailsRule}> {
+        try {
+            const result = await seekerModel.findById(seekerId)
+            if(!result){
+                return {success: false}
+            }
+            return {success: true, seeker: result}
+        } catch (error: any) {
+            console.error('Error in getSeekerDetails at repository/seekerRepository: ', error.message)
+            return {success: false}
+
         }
     }
 

@@ -10,6 +10,7 @@ import AppError from "../../frameworks/utils/errorInstance";
 import httpStatus from "../../entities/rules/httpStatusCodes";
 import { hashPassword } from "../../frameworks/services/passwordService";
 
+
 class UserAuth implements ISeekerAuthInterface {
     private repository: ISeekerRepository
     private mailer: IMailerInterface
@@ -27,10 +28,10 @@ class UserAuth implements ISeekerAuthInterface {
 
         try {
 
-            const isUserExist = await this.repository.seekerExists(userData.email)
+            const isUserExist = await this.repository.seekerExists(userData.email as string)
 
             if (!isUserExist) {
-                const mailResponse = await this.mailer.sendMail(userData.email)
+                const mailResponse = await this.mailer.sendMail(userData.email as string)
                 const storeOtpAndUserData = await this.repository.tempOtp(mailResponse.otp as string, userData)
                 console.log('OTP>>>>>>>>>', mailResponse.otp)
                 if (mailResponse.success && storeOtpAndUserData.created) {
@@ -88,7 +89,7 @@ class UserAuth implements ISeekerAuthInterface {
                 return { success: false, message: 'Email not found. Please signup again' }
             }
 
-            const mailResponse = await this.mailer.sendMail(findSeeker.userData.email)
+            const mailResponse = await this.mailer.sendMail(findSeeker.userData.email as string)
             const storeOtpAndUserData = await this.repository.tempOtp(mailResponse.otp as string, findSeeker.userData)
 
             if (mailResponse.success && storeOtpAndUserData.created) {
@@ -117,8 +118,8 @@ class UserAuth implements ISeekerAuthInterface {
                     return { success: false, message: validUser.message }
                 }
             }
-            const accessToken = this.jwtService.generateAccessToken({ id: validUser.user?.id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1hr' })
-            const refreshToken = this.jwtService.generateRefreshToken({ id: validUser.user?.id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1d' })
+            const accessToken = this.jwtService.generateAccessToken({ id: validUser.user?._id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1hr' })
+            const refreshToken = this.jwtService.generateRefreshToken({ id: validUser.user?._id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1d' })
         
             if(validUser.user){
                 validUser.user.accessToken = accessToken

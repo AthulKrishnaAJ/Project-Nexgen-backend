@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from "express";
 
 
 //files
-import ISeekerAuthInterface from "../../../entities/seeker/ISeekerAuthInteractor";
 import httpStatus from "../../../entities/rules/httpStatusCodes";
 import AppError from "../../../frameworks/utils/errorInstance";
 
-//types
+//types and interfaces
 import { seekerDetailsRule } from "../../../entities/rules/seekerRules";
+import ISeekerAuthInterface from "../../../entities/seeker/ISeekerAuthInteractor";
 
 
 class AuthController {

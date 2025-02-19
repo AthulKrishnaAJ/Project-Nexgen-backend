@@ -1,7 +1,8 @@
 import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository";
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
+import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
-import { EmployerDetailsRule } from "../../entities/rules/companyRules";
+import { EmployerDetailsRule, JobPostDataState } from "../../entities/rules/companyRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
 
 class CompanyRepository implements ICompanyRepository {
@@ -86,11 +87,11 @@ class CompanyRepository implements ICompanyRepository {
                 mobile: companyData.mobile,
                 password: hashedPassword
             })
-            console.log('User created successfully: ', newSeeker)
-
+            
             if(!newSeeker){
                 return {created: false}
             }
+            console.log('User created successfully: ', newSeeker)
             return {created: true}
         }catch(error: any){
             console.error('Error in creating user at seeker repository: ', error.message)
@@ -174,6 +175,40 @@ class CompanyRepository implements ICompanyRepository {
             return {success: false}
         }
 
+    }
+
+
+    async companyJobPostRepo(jobData: JobPostDataState): Promise<boolean> {
+        try {
+            console.log('Data in company job post repooooooooooo: ', jobData)
+            if(!jobData){
+                return false
+            }
+
+            const newJob = await jobPostModel.create({
+                title: jobData.title,
+                description: jobData.description,
+                location: jobData.location,
+                employmentType: jobData.employmentType,
+                workMode: jobData.workMode,
+                salaryRange: {
+                    min: jobData.minSalary,
+                    max: jobData.maxSalary
+                },
+                skills: jobData.skills,
+                requirements: jobData.requirements,
+                benefits: jobData.benefits,
+                companyId: jobData.companyId
+            })
+            if(!newJob){
+                return false
+            }
+            console.log('Job created: ', newJob)
+            return true
+        } catch (error: any) {
+            console.error('Error in companyJobPostRepo at repository/companyRepository: ', error.message)
+            return false
+        }
     }
 
 
