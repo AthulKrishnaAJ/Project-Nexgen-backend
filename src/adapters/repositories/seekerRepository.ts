@@ -1,5 +1,5 @@
 //Files
-import iSeekerRepository from "../../entities/IRepositories/ISeekerRepository";
+import iSeekerRepository from "../../entities/IRepositories/iSeekerRepository";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import { seekerDetailsRule, SeekerEditProfileRule, SeekerFetchingDetailsRule } from "../../entities/rules/seekerRules";
