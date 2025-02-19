@@ -5,6 +5,10 @@ import CompanyRepository from '../../../adapters/repositories/companyRepository'
 import CommonRepository from '../../../adapters/repositories/commonRepository'
 import Mailer from '../../services/mailer'
 import JwtService from '../../services/jwt'
+import authMiddleware from '../middlewares/roleAuthorization'
+
+import CompanyJobCases from '../../../usecases/company/companyJobCases'
+import companyJobController from '../../../adapters/controllers/companyController/companyJobController'
 
 
 const companyRouter: Router = express.Router()
@@ -13,14 +17,19 @@ const commonRepository = new CommonRepository()
 const mailer = new Mailer()
 const jwtService = new JwtService()
 const companyAuth = new CompanyAuth(repository, mailer, jwtService, commonRepository)
-const controller = new CompanyAuthController(companyAuth)
+const authController = new CompanyAuthController(companyAuth)
 
-companyRouter.post('/signup', controller.employerSendOtpControl)
-companyRouter.post('/verifyOtp', controller.employerVerifyOtpControl)
-companyRouter.post('/login', controller.employerLoginControl)
-companyRouter.post('/emailVerify', controller.employerForgotPasswordEmailVeifyControl)
-companyRouter.post('/verifyOtpForChangePassword', controller.employerChangePasswordVerifyOtpControl)
-companyRouter.post('/changePassword', controller.employerChangePasswordControl)
+const companyJobCases = new CompanyJobCases(repository, commonRepository)
+const jobController = new companyJobController(companyJobCases)
+
+companyRouter.post('/signup', authController.employerSendOtpControl)
+companyRouter.post('/verifyOtp', authController.employerVerifyOtpControl)
+companyRouter.post('/login', authController.employerLoginControl)
+companyRouter.post('/emailVerify', authController.employerForgotPasswordEmailVeifyControl)
+companyRouter.post('/verifyOtpForChangePassword', authController.employerChangePasswordVerifyOtpControl)
+companyRouter.post('/changePassword', authController.employerChangePasswordControl)
+
+companyRouter.post('/jobPost', authMiddleware('company', jwtService), jobController.jobPostControl)
 
 
 export default companyRouter

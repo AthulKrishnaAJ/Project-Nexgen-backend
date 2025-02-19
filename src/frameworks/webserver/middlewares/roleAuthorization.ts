@@ -43,9 +43,11 @@ const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
                 if(id) tokenPayload.id = id
 
                 accessToken = jwtService.generateAccessToken(tokenPayload, {expiresIn: '1hr'})
-
-                res.setHeader('Authorization', `Bearer ${accessToken}`)
+                console.log('New access token in auth middleware: ', accessToken)
+                res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+                res.setHeader('Authorization', `Bearer ${accessToken}`);
                 decode = jwtService.verifyToken(accessToken);
+                
             }
 
 

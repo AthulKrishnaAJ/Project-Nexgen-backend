@@ -1,5 +1,6 @@
 
 import { EmployerDetailsRule } from "../rules/companyRules"
+import { JobPostDataState } from "../rules/companyRules";
 
 export default interface ICompanyRepository {
     companyExists(email: string): Promise<{success: boolean, companyData?: EmployerDetailsRule}>;
@@ -9,5 +10,6 @@ export default interface ICompanyRepository {
     companyLoginRepo(email: string, password: string): Promise<{userData?: EmployerDetailsRule, success: boolean, message: string}>
     companyUpdateFieldByEmailRepo(email: string, value: string, field: string): Promise<{success: boolean, message?: string}>
     companyUpdateFieldByIdRepo(id: string, updateData: any): Promise<{success: boolean}>
+    companyJobPostRepo(jobData: JobPostDataState): Promise<boolean>
     
 }

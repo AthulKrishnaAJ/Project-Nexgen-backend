@@ -33,7 +33,45 @@ const seekerSchema = new Schema<seekerDetailsRule>({
     blocked: {
         type: Boolean,
         default: false
-    }
+    },
+    dateOfBirth: {
+        type: String
+    },
+    gender: {
+        type: String
+    },
+    pincode: {
+        type: String
+    },
+    city: {
+        type: String
+    },
+    state: {
+        type: String
+    },
+    bio: {
+        type: String
+    },
+    certifications: {
+        type: [String]
+    },
+    experience: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "seeker-experience", 
+        },
+      ],
+
+    educations: [
+        {
+            qualification: String,
+            institution: String,
+            fieldOfStudy: String,
+            startDate: Date,
+            endDate: Date,
+        }
+    ]
+
 }, {timestamps: true})
 
 
