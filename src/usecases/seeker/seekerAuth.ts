@@ -1,7 +1,7 @@
 
 //Files
 import ISeekerAuthInterface from "../../entities/seeker/ISeekerAuthInteractor";
-import ISeekerRepository from "../../entities/IRepositories/ISeekerRepository";
+import ISeekerRepository from "../../entities/IRepositories/iSeekerRepository";
 import ICommonRepository from "../../entities/IRepositories/ICommonRepository";
 import { IMailerInterface } from "../../entities/services/IMailerInteractor";
 import { seekerDetailsRule } from "../../entities/rules/seekerRules";

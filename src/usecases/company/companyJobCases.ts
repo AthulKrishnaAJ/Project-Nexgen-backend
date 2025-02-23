@@ -1,7 +1,7 @@
 import ICompanyJobInterface from "../../entities/company/ICompanyJobInteractor"
 import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository"
 import ICommonRepository from "../../entities/IRepositories/ICommonRepository"
-import { JobPostDataState } from "../../entities/rules/companyRules"
+import { JobPostDataState, JobPostRule, changeJobStatusProps } from "../../entities/rules/companyRules"
 import AppError from "../../frameworks/utils/errorInstance"
 import httpStatus from "../../entities/rules/httpStatusCodes"
 
@@ -24,6 +24,32 @@ class CompanyJobCases implements ICompanyJobInterface {
         return {success: true, message: 'Job posted'}
         } catch (error: any) {
             console.error('Error in jobPostCase at companyJobCases/usecases: ', error.message)
+            throw error
+        }
+    }
+
+    async getAllJobsCase(companyId: string): Promise<{success: boolean, statusCode:number, jobs?: JobPostRule[]}> {
+        try {
+            const response = await this.repository.getAllJobsRepo(companyId)
+            if(!response.success){
+                throw new AppError('Something went wrong, cannot find jobs', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return {success: response.success, statusCode: httpStatus.OK, jobs: response.jobs}
+        } catch (error: any) {
+            console.error('Error in getAllJobsCase at companyJobCases/usecases: ', error.message)
+            throw error
+        }
+    }
+
+    async changeJobStatusCase(data: changeJobStatusProps): Promise<{success:boolean, message:string, statusCode:number}> {
+        try {
+            const response = await this.repository.updateJobsFieldRepo(data)
+            if(!response){
+                throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return {success: true, message: 'Status changed', statusCode:httpStatus.OK}
+        } catch (error: any) {
+            console.error('Error in changeJobStatusCase at companyJobCases/usecases: ', error.message)
             throw error
         }
     }

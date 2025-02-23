@@ -2,7 +2,7 @@ import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository"
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
-import { EmployerDetailsRule, JobPostDataState } from "../../entities/rules/companyRules";
+import { EmployerDetailsRule, JobPostDataState, JobPostRule , changeJobStatusProps} from "../../entities/rules/companyRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
 
 class CompanyRepository implements ICompanyRepository {
@@ -195,6 +195,10 @@ class CompanyRepository implements ICompanyRepository {
                     min: jobData.minSalary,
                     max: jobData.maxSalary
                 },
+                experience: {
+                    min: jobData.minExperience,
+                    max: jobData.maxExperience
+                },
                 skills: jobData.skills,
                 requirements: jobData.requirements,
                 benefits: jobData.benefits,
@@ -208,6 +212,34 @@ class CompanyRepository implements ICompanyRepository {
         } catch (error: any) {
             console.error('Error in companyJobPostRepo at repository/companyRepository: ', error.message)
             return false
+        }
+    }
+
+    async  getAllJobsRepo(companyId: string): Promise<{success: boolean, jobs?: JobPostRule[]}> {
+        try {
+            const jobs = await jobPostModel.find({companyId: companyId})
+            if(!jobs){
+                return {success: false}
+            }
+            return {success: true, jobs: jobs}
+        } catch (error: any) {
+            console.error('Error in getAllJobsRepo at repository/companyRepository: ', error.message)
+            return {success: false}
+        }
+    }
+
+    async updateJobsFieldRepo(data: changeJobStatusProps): Promise<boolean> {
+        try {
+            const {jobId} = data
+            const updateField = await jobPostModel.updateOne({_id: jobId}, {$set: data})
+            if(updateField.modifiedCount === 0){
+                return false
+            }
+            return true
+        } catch (error: any) {
+            console.error('Error in updateJobsFieldRepo at repository/companyRepository: ', error.message)
+            return false
+            
         }
     }
 

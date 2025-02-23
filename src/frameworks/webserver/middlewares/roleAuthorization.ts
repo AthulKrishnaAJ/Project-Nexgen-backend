@@ -60,6 +60,7 @@ const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
 
 
             if(userRole === 'user' && userId){
+                console.log('ITS USER')
                 const seeker = await seekerModel.findById(userId)
                 if(!seeker) return res.status(httpStatus.UNAUTHORIZED).json({message: 'User not found'})
                 if(seeker.blocked) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Access denied. Account is blocked'})
@@ -67,6 +68,7 @@ const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
 
             
             if(userRole === 'company' && userId){
+                console.log('ITS COMPANY')
                 const company = await companyModel.findById(userId)
                 if(!company) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Company not found'})
                 if(company.blocked) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Access denied. Account is blocked'})

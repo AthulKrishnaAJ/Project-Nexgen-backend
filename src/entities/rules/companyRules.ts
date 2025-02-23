@@ -22,7 +22,6 @@ export interface EmployerDetailsRule {
 
 export interface CompanyDetailsRule {
     companyId: Types.ObjectId;
-    profileImage?: string;
     description?: string
     companySize?: string
     location?: string;
@@ -39,18 +38,20 @@ export interface CompanyDetailsRule {
 
 
 export interface JobPostRule {
+    _id?: Types.ObjectId;
     title: string;
     description: string;
     location: string;
     employmentType: 'Full-time' | 'Part-time' | 'Internship';
     workMode: 'On-site' | 'Hybrid' | 'Remote';
     salaryRange: {min: string, max: string};
+    experience: {min: string, max: string};
     skills: string[];
     requirements: string[];
     benefits: string[];
-    jobApplications?: Types.ObjectId[];
+    jobApplications?: Types.ObjectId[] | [];
     companyId: Types.ObjectId;
-    status?: 'open' | 'closed' | 'paused'
+    status?: 'open' | 'closed'
 
 }
 
@@ -61,9 +62,55 @@ export interface JobPostDataState {
     workMode: string;
     minSalary: string;
     maxSalary: string;
+    minExperience: string;
+    maxExperience: string;
     skills: string[];
     requirements: string[];    
     benefits: string[];
     description: string;
     companyId: string;
 }
+
+
+export interface changeJobStatusProps {
+    jobId: string;
+    newStatus: string;
+}
+
+
+export interface GetCompanyDetialsState {
+    _id: Types.ObjectId;
+    companyName: string;
+    industry: string;
+    email: string;
+    mobile: string;
+    password?: string;
+    blocked:boolean;
+    verify: string;
+    rejection: {
+        expiryDate: Date | null;
+        reason: string | null;
+    }
+}
+
+
+export interface GetAllJobsState {
+    _id?: Types.ObjectId;
+    title: string;
+    description: string;
+    location: string;
+    employmentType: string;
+    workMode: string;
+    salaryRange: {min: string, max: string};
+    experience: {min: string, max: string};
+    skills: string[];
+    requirements: string[];
+    benefits: string[];
+    jobApplications?: Types.ObjectId[] | [];
+    companyId: Types.ObjectId;
+    status?: 'open' | 'closed'
+    companyName?: string;
+}
+
+
+

@@ -1,9 +1,12 @@
 
 import IcommonRepository from "../../entities/IRepositories/ICommonRepository";
 import { UserDataForAdmin, CompanyDataForAdmin } from "../../entities/rules/adminRules";
+import { JobPostRule, GetCompanyDetialsState } from "../../entities/rules/companyRules";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
+import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
+import { findCompanyProjection } from "../../entities/rules/projections";
 
 
 class CommonRepository implements IcommonRepository{
@@ -71,6 +74,34 @@ class CommonRepository implements IcommonRepository{
             console.error('Error in findCompanyByEmail at repository/commonRepository: ', error.message)
             return {success: false}
             
+        }
+    }
+
+    async getAllJobsRepo():Promise<{success: boolean, jobs?:JobPostRule[]}>{
+        try {
+            const getJobs = await jobPostModel.find().lean()
+            if(!getJobs){
+                return {success: false}
+            }
+            return {success: true, jobs: getJobs}
+        } catch (error: any) {
+            console.error('Error in getAllJobsRepo at repository/commonRepository: ', error.message)
+            return {success: false}
+        }
+    }
+
+
+    async getCompaniesById(companyIds: string[]): Promise<{success: boolean, companyDatas?: GetCompanyDetialsState[]}> {
+        try {
+            const companies = await companyModel.find(
+                {_id: {$in: companyIds}},
+                findCompanyProjection
+            ).lean()
+
+            return {success: true, companyDatas: companies as GetCompanyDetialsState[]}
+        } catch (error: any) {
+            console.error('Error in getCompanyByCompanyId at repository/commonRepository: ', error.message)
+            return {success: false}
         }
     }
 

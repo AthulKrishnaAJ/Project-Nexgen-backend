@@ -30,6 +30,8 @@ companyRouter.post('/verifyOtpForChangePassword', authController.employerChangeP
 companyRouter.post('/changePassword', authController.employerChangePasswordControl)
 
 companyRouter.post('/jobPost', authMiddleware('company', jwtService), jobController.jobPostControl)
+companyRouter.get('/getJobs/:companyId', authMiddleware('company', jwtService), jobController.getAllJobsControl)
+companyRouter.post('/changeJobStatus',  authMiddleware('company', jwtService), jobController.changejobStatusControl)
 
 
 export default companyRouter
