@@ -8,12 +8,6 @@ const companyDetailsSchema = new Schema<CompanyDetailsRule>({
         required: true,
         unique: true
     },
-
-    profileImage: {
-        type: String,
-        default: null
-    },
-
     description: {
         type: String,
         default: null
@@ -38,7 +32,6 @@ const companyDetailsSchema = new Schema<CompanyDetailsRule>({
         type: Object,
         default: {}
     },
-
     logo: {
         type: String,
         default: null

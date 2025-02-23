@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
-//types and interfaces 
+//interfaces 
 import ISeekerProfileInterfce from "../../../entities/seeker/ISeekerProfileInterface";
 
 
@@ -14,6 +14,7 @@ class seekerProfileController {
     getSeekerControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const seekerId = req.params.seekerId
+            console.log('Enter hereeeeeeeeeeeeee')
             const response = await this.interactor.getSeekerCase(seekerId)
             return res.status(response.statusCode).json({status: response.success, seekerData: response.seeker})
         } catch (error: any) {

@@ -42,10 +42,14 @@ class AdminCompany implements IAdminCompanyInterface {
                 throw new AppError('Somthing went wrong try again', httpStatus.INTERNAL_SERVER_ERROR)
             }
             let updatedData: CompanyVerifyData = {verify: action}
-
+            let rejectionDays = 0
             if(action === 'reject' && reason){
                 const expiryDate = new Date()
                 expiryDate.setMonth(expiryDate.getMonth() + 6)
+
+                const currentDate = new Date()
+                rejectionDays =  Math.ceil((expiryDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)); 
+
                 updatedData.rejection = {
                     reason,
                     expiryDate
@@ -57,16 +61,21 @@ class AdminCompany implements IAdminCompanyInterface {
                 }
             }
             const updatedCompany = await this.repository.findCompanyByIdAndUpdate(companyId, updatedData, companyProjectionData)
+            
             if(!updatedCompany.success){
                 throw new AppError('Verification failed please try again', httpStatus.INTERNAL_SERVER_ERROR)
             }
-            const emailText = action === 'accept' ? 
-            {subject: 'Approval mail from Nexgen',
-             message: 'Your company has been verified successfully.'
-            } : {subject: 'Rejection mail from Nexgen',
-                message: `Your company was rejected. 
-                Reason was ${reason}. You can re-register after 7 days.`
-            }
+
+
+           const emailText = action === 'accept' 
+            ? {
+                subject: 'Approval mail from Nexgen',
+                message: 'Your company has been verified successfully.'
+            } 
+            : {
+                subject: 'Rejection mail from Nexgen',
+                message: `Your company was rejected. Reason: ${reason}. You can re-register after ${rejectionDays} days.`
+            };
 
             const sendMailtoClient = await this.mailer.sendMailToClients(email, emailText.subject, emailText.message)
 

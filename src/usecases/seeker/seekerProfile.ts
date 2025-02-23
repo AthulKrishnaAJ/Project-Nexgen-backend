@@ -3,7 +3,7 @@ import httpStatus from "../../entities/rules/httpStatusCodes"
 
 //type and interfaces
 import ISeekerProfileInterfce from "../../entities/seeker/ISeekerProfileInterface"
-import ISeekerRepository from "../../entities/IRepositories/ISeekerRepository"
+import ISeekerRepository from "../../entities/IRepositories/iSeekerRepository"
 import ICommonRepository from "../../entities/IRepositories/ICommonRepository"
 import { SeekerEditProfilePayloadRule, SeekerDataForStore, SeekerFetchingDetailsRule, seekerDetailsRule } from "../../entities/rules/seekerRules"
 

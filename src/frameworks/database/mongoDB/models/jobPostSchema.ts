@@ -33,7 +33,14 @@ const jobPostSchema = new Schema<JobPostRule>({
         min: {type: String, required: true},
         max: {type: String, required: true}
     },
-
+    experience: {
+        min: {
+            type: String
+        },
+        max: {
+            type: String
+        }
+    },
     skills: {
         type: [String],
         required: true
@@ -63,7 +70,7 @@ const jobPostSchema = new Schema<JobPostRule>({
 
     status: {
         type: String,
-        enum: ['open', 'closed', 'paused'],
+        enum: ['open', 'closed'],
         default: 'open'
     }
 }, {timestamps: true})
