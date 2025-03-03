@@ -4,6 +4,13 @@ import { Request, Response, NextFunction } from "express";
 import IAdminAuthInterface from "../../../entities/admin/IAdminAuthInteractor";
 import httpStatus from "../../../entities/rules/httpStatusCodes";
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
+
 class AdminAuthController {
     private interactor: IAdminAuthInterface
 

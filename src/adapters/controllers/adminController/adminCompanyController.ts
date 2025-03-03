@@ -3,6 +3,12 @@ import { Request, Response, NextFunction } from "express"
 import IAdminCompanyInterface from "../../../entities/admin/IAdminCompanyInteractor"
 import httpStatus from "../../../entities/rules/httpStatusCodes"
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
 
 class AdminCompanyController {
     private interactor: IAdminCompanyInterface

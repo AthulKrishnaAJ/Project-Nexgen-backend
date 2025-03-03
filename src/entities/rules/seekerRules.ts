@@ -17,9 +17,12 @@ export interface seekerDetailsRule {
     city?: string;
     state?: string;
     bio?: string;
+    skills?:string[];
+    resume?:string[];
     certifications?: string[];
     experience?: Types.ObjectId[];
     educations?: SeekerEducationRule[];
+    resumeFiles?: { fileKey: string, base64: string }[]
 }
 
 export interface SeekerExperienceRule {

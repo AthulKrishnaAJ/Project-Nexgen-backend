@@ -8,6 +8,14 @@ import httpStatus from "../../../entities/rules/httpStatusCodes";
 import { EmployerDetailsRule } from "../../../entities/rules/companyRules";
 
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
+
+
 class CompanyAuthController {
     private interactor: ICompanyAuthInteface
 

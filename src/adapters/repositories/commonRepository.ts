@@ -1,12 +1,13 @@
 
 import IcommonRepository from "../../entities/IRepositories/ICommonRepository";
 import { UserDataForAdmin, CompanyDataForAdmin } from "../../entities/rules/adminRules";
-import { JobPostRule, GetCompanyDetialsState } from "../../entities/rules/companyRules";
+import { JobPostRule, GetCompanyDetialsState, EmployerDetailsRule } from "../../entities/rules/companyRules";
 import redisClient from "../../frameworks/database/redis/redisConnection";
 import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import { findCompanyProjection } from "../../entities/rules/projections";
+import { CompanyDetailsState } from "../../entities/rules/commonRules";
 
 
 class CommonRepository implements IcommonRepository{
@@ -79,7 +80,7 @@ class CommonRepository implements IcommonRepository{
 
     async getAllJobsRepo():Promise<{success: boolean, jobs?:JobPostRule[]}>{
         try {
-            const getJobs = await jobPostModel.find().lean()
+            const getJobs = await jobPostModel.find({ status: "open" }).lean()
             if(!getJobs){
                 return {success: false}
             }
@@ -91,7 +92,7 @@ class CommonRepository implements IcommonRepository{
     }
 
 
-    async getCompaniesById(companyIds: string[]): Promise<{success: boolean, companyDatas?: GetCompanyDetialsState[]}> {
+    async getCompaniesById(companyIds: string[]): Promise<{success: boolean; companyDatas?: GetCompanyDetialsState[]}> {
         try {
             const companies = await companyModel.find(
                 {_id: {$in: companyIds}},
@@ -104,6 +105,30 @@ class CommonRepository implements IcommonRepository{
             return {success: false}
         }
     }
+
+
+    async getAllCompaniesRepo(): Promise<{ success: boolean; company?: EmployerDetailsRule[]}> {
+        try {
+            const companies = await companyModel.find(
+                {blocked: false, verify: {$ne: 'reject'}}, 
+                {password: 0}).lean()
+
+            return {success: true, company: companies}
+        } catch (error: any) {
+            console.error('Error in getAllCompaniesRepo at commonRepository')
+            return {success: false}
+        }
+    }
+
+    async getCompanyByIdRepo(companyId: string): Promise<{success: boolean, company?: EmployerDetailsRule | null}> {
+        try {
+            const companyDetail = await companyModel.findById(companyId, {password: 0})
+            return {success: true, company: companyDetail}
+        } catch (error) {
+            console.error('Error in getCompanyByIdRepo at commonRepository')
+            return {success: false}
+        }
+    }   
 
 
 }

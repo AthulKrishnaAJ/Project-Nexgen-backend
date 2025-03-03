@@ -1,6 +1,7 @@
 
 import { UserDataForAdmin, CompanyDataForAdmin } from "../rules/adminRules";
-import { JobPostRule, GetCompanyDetialsState } from "../rules/companyRules";
+import { JobPostRule, GetCompanyDetialsState, EmployerDetailsRule } from "../rules/companyRules";
+import { CompanyDetailsState } from "../rules/commonRules";
 
 export default interface ICommonRepository{
     saveOtpAndEmail(email: string, otp: string): Promise<{stored: boolean}>;
@@ -9,4 +10,6 @@ export default interface ICommonRepository{
     findCompanyByEmail(email: string): Promise<{companyData?: CompanyDataForAdmin, success: boolean}>
     getAllJobsRepo():Promise<{success: boolean, jobs?:JobPostRule[]}>
     getCompaniesById(companyId: string[]): Promise<{success: boolean, companyDatas?: GetCompanyDetialsState[]}>;
+    getAllCompaniesRepo(): Promise<{ success: boolean; company?: CompanyDetailsState[]}>
+    getCompanyByIdRepo(companyId: string): Promise<{success: boolean, company?: EmployerDetailsRule | null}>;
 }

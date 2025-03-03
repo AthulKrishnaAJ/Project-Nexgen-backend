@@ -10,6 +10,14 @@ import { seekerDetailsRule } from "../../../entities/rules/seekerRules";
 import ISeekerAuthInterface from "../../../entities/seeker/ISeekerAuthInteractor";
 
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
+
+
 class AuthController {
     private interactor: ISeekerAuthInterface
 
@@ -22,10 +30,6 @@ class AuthController {
         try {
             const userData: seekerDetailsRule = req.body
             console.log('user data: ',  userData)
-
-            if(!userData.email){
-                return res.status(httpStatus.BAD_REQUEST).json({success: false, message: 'Email is required'})
-            }
 
             const response = await this.interactor.sendOtp(userData)
     
@@ -90,27 +94,23 @@ class AuthController {
     }
 
 
-    loginControl = async (req: Request, res: Response): Promise<any> => {
+    loginControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
         try {
             const {email, password} = req.body
             console.log('====>',email, password)
             const response = await this.interactor.login(email, password)
-            if(!response.success){
-                return res.status(httpStatus.BAD_REQUEST).json({status: false, message: response.message})
-            } else {
-                res.cookie('refreshToken', response.seekerRefreshToken,{
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',  
-                    sameSite: 'lax',
-                    maxAge: 24 * 60 * 60 * 1000,
-                    path: '/'
-                })
-                
-                return res.status(httpStatus.OK).json({user: response.user, status: true, message: response.message})
-            }
-        } catch (error: any) {
-            console.error('Error occur while login seeker at loginControl: ', error.message)
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).json({status: false, message: 'Somthing went wrong please try again'})
+
+            res.cookie('refreshToken', response.seekerRefreshToken,{
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',  
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'
+            })  
+            return res.status(httpStatus.OK).json({user: response.user, status: true, message: response.message})
+            
+        } catch (error) {
+            next(error)
         }
     }
 
@@ -119,8 +119,7 @@ class AuthController {
             const {email} = req.body
             const response = await this.interactor.verifyEmail(email)
             return res.status(httpStatus.OK).json({status: response.success, message: response.message})
-        } catch (error: any) {
-            console.error('Error occur while verifiying email for forgot password at emailVerifyControl: ', error.message)
+        } catch (error) {
             next(error)
         }
     }
@@ -130,8 +129,7 @@ class AuthController {
             const {email, otp} = req.body
             const response = await this.interactor.otpVerificationForChangingPassword(email, otp)
             return res.status(httpStatus.OK).json({status: response.success, message: response.message})
-        } catch (error: any) {
-            console.error('Error occur while verify OTP for changing password: ', error.message)
+        } catch (error) {
             next(error)
         }
     }
@@ -142,8 +140,7 @@ class AuthController {
             console.log('DAta =====> ', email, password)
             const response = await this.interactor.changePasswordCase(email, password)
             return res.status(httpStatus.OK).json({status: response.success, message: response.message})
-        } catch (error: any) {
-            console.error('Error occur while changing password at changePasswordControl: ', error.message)
+        } catch (error) {
             next(error)
         }
     }

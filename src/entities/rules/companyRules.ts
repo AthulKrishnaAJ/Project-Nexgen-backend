@@ -16,15 +16,11 @@ export interface EmployerDetailsRule {
     }
     accessToken?: string;
     role?: string;
-   
-}
-
-
-export interface CompanyDetailsRule {
-    companyId: Types.ObjectId;
+    state?: string;
+    district?: string;
+    foundedAt?: string;
     description?: string
     companySize?: string
-    location?: string;
     website?: string;
     socialLinks?: {
         linkedin?: string;
@@ -33,15 +29,18 @@ export interface CompanyDetailsRule {
     }
     logo?: string;
     images?: string[];
-    jobPosts?: Types.ObjectId[]
+   
 }
+
+
 
 
 export interface JobPostRule {
     _id?: Types.ObjectId;
     title: string;
     description: string;
-    location: string;
+    state: string;
+    district: string;
     employmentType: 'Full-time' | 'Part-time' | 'Internship';
     workMode: 'On-site' | 'Hybrid' | 'Remote';
     salaryRange: {min: string, max: string};
@@ -57,7 +56,8 @@ export interface JobPostRule {
 
 export interface JobPostDataState {
     title: string;
-    location: string;
+    state: string;
+    district: string;
     employmentType: string;
     workMode: string;
     minSalary: string;
@@ -98,7 +98,8 @@ export interface GetAllJobsState {
     _id?: Types.ObjectId;
     title: string;
     description: string;
-    location: string;
+    state: string;
+    district: string;
     employmentType: string;
     workMode: string;
     salaryRange: {min: string, max: string};
@@ -112,5 +113,7 @@ export interface GetAllJobsState {
     companyName?: string;
 }
 
+
+  
 
 

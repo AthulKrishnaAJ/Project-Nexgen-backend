@@ -52,6 +52,12 @@ const seekerSchema = new Schema<seekerDetailsRule>({
     bio: {
         type: String
     },
+    skills: {
+        type: [String]
+    },
+    resume: {
+        type: [String]
+    },
     certifications: {
         type: [String]
     },

@@ -3,6 +3,14 @@ import { Request, Response, NextFunction } from "express";
 //interfaces 
 import ISeekerJobInterface from "../../../entities/seeker/ISeekerJobInterface"
 
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
+
 class SeekerJobController {
     private interactor: ISeekerJobInterface
 
@@ -14,8 +22,7 @@ class SeekerJobController {
         try {
             const response = await this.interactor.getAllJobCase()
             return res.status(response.statusCode).json({status: true, jobs: response.jobs})
-        } catch (error: any) {
-            console.error('Error in getAllJobsControl  at seekerProfileController: ', error.message)
+        } catch (error) {
             next(error)
         }
     }

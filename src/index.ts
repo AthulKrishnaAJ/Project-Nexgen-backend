@@ -17,6 +17,7 @@ server.once("error", (err: any) => {
     }
 });
 
+
 server.once("listening", () => {
     server.close();
     // Start the Express app once the port is confirmed to be free

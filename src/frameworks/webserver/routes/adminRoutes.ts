@@ -40,13 +40,13 @@ adminRouter.post('/login', authController.adminLoginControl)
 
 
 //User controller
-adminRouter.get('/getAllSeekers', authMiddleware('admin', jwtService), seekerController.getAllUserControl)
-adminRouter.post('/blockUnblockSeeker', authMiddleware('admin', jwtService), seekerController.usersBlockUnblockControl)
+adminRouter.get('/getAllSeekers', authMiddleware('admin'), seekerController.getAllUserControl)
+adminRouter.post('/blockUnblockSeeker', authMiddleware('admin'), seekerController.usersBlockUnblockControl)
 
 
 //Company controller
-adminRouter.get('/getAllCompanies', authMiddleware('admin', jwtService), companyController.getAllCompaniesControl)
-adminRouter.post('/companyVerification', authMiddleware('admin', jwtService), companyController.comapnyVerificationControl)
+adminRouter.get('/getAllCompanies', authMiddleware('admin'), companyController.getAllCompaniesControl)
+adminRouter.post('/companyVerification', authMiddleware('admin'), companyController.comapnyVerificationControl)
 
 
 

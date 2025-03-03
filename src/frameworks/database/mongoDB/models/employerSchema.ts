@@ -45,6 +45,45 @@ const companySchema = new Schema<EmployerDetailsRule>({
             type: String,
             default: null
         }
+    },
+    state: {
+        type: String,
+        required: true,
+    },
+    district: {
+        type: String,
+        required: true,
+    },
+    foundedAt: {
+        type:String,
+        required: true
+    },
+    description: {
+        type: String,
+        default: null
+    },
+    companySize: {
+        type: String,
+        default: null
+    },
+
+    website: {
+        type: String,
+        default: null
+    },
+
+    socialLinks: {
+        type: Object,
+        default: {}
+    },
+    logo: {
+        type: String,
+        default: null
+    },
+
+    images: {
+        type: [String],
+        default: []
     }
 }, {timestamps: true})
 

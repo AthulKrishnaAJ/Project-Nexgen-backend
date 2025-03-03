@@ -2,6 +2,15 @@ import { Request, Response, NextFunction } from "express"
 import IAdminSeekerInterface from "../../../entities/admin/IAdminSeekerInteractor"
 import httpStatus from "../../../entities/rules/httpStatusCodes"
 
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
+
+
 class AdminSeekerController {
     private interactor: IAdminSeekerInterface
 
