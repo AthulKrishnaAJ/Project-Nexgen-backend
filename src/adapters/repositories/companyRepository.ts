@@ -85,6 +85,9 @@ class CompanyRepository implements ICompanyRepository {
                 industry: companyData.industry,
                 email: companyData.email,
                 mobile: companyData.mobile,
+                foundedAt: companyData.foundedAt,
+                state: companyData.state,
+                district: companyData.district,
                 password: hashedPassword
             })
             
@@ -188,7 +191,8 @@ class CompanyRepository implements ICompanyRepository {
             const newJob = await jobPostModel.create({
                 title: jobData.title,
                 description: jobData.description,
-                location: jobData.location,
+                state: jobData.state,
+                district: jobData.district,
                 employmentType: jobData.employmentType,
                 workMode: jobData.workMode,
                 salaryRange: {

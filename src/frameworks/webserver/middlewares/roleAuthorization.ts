@@ -1,18 +1,19 @@
 import { Response, NextFunction } from "express";
 import httpStatus from "../../../entities/rules/httpStatusCodes";
-import IJwtSerivce from "../../../entities/services/IJwtService";
 import companyModel from "../../database/mongoDB/models/employerSchema";
 import seekerModel from "../../database/mongoDB/models/seekerSchema";
 import { AuthenticatedRequest } from "../../../entities/types/express";
+import JwtService from "../../services/jwt";
 
 
-const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
+const authMiddleware = (allowedRole: string) => {
+
+    const jwtService = new JwtService()
 
     return  async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<any> => {
 
         try {
 
-                
             let accessToken = req.headers.authorization?.split(' ')[1]
             const refreshToken = req.cookies?.refreshToken
    
@@ -53,14 +54,14 @@ const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
 
             const userRole = decode.verifyToken?.role
             const userId = decode.verifyToken?.id
-
+            console.log('allowedRole: ', allowedRole)
+            console.log('userRole: ', userRole)
             if(allowedRole !== userRole){
                 return res.status(httpStatus.FORBIDDEN).json({message: 'Permission denied'})
             }
 
 
             if(userRole === 'user' && userId){
-                console.log('ITS USER')
                 const seeker = await seekerModel.findById(userId)
                 if(!seeker) return res.status(httpStatus.UNAUTHORIZED).json({message: 'User not found'})
                 if(seeker.blocked) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Access denied. Account is blocked'})
@@ -68,7 +69,6 @@ const authMiddleware = (allowedRole: string, jwtService: IJwtSerivce) => {
 
             
             if(userRole === 'company' && userId){
-                console.log('ITS COMPANY')
                 const company = await companyModel.findById(userId)
                 if(!company) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Company not found'})
                 if(company.blocked) return res.status(httpStatus.UNAUTHORIZED).json({message: 'Access denied. Account is blocked'})

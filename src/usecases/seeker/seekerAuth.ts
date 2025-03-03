@@ -110,13 +110,7 @@ class UserAuth implements ISeekerAuthInterface {
             const validUser = await this.repository.loginSeeker(email, password)
 
             if (!validUser.success) {
-                if (validUser.message === 'Incorrect email' || validUser.message === 'Incorrect password') {
-                    return { success: false, message: 'Invalid email or password. Please try again' }
-                }
-
-                if (validUser.message === 'Access denied. Your account is blocked') {
-                    return { success: false, message: validUser.message }
-                }
+               throw new AppError(validUser.message, httpStatus.BAD_REQUEST)
             }
             const accessToken = this.jwtService.generateAccessToken({ id: validUser.user?._id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1hr' })
             const refreshToken = this.jwtService.generateRefreshToken({ id: validUser.user?._id, email: validUser.user?.email, role: 'user' }, { expiresIn: '1d' })
@@ -133,7 +127,7 @@ class UserAuth implements ISeekerAuthInterface {
 
         } catch (error: any) {
             console.error('Error in login at seekerAuth: ', error.message)
-            return { success: false, message: 'Failed to login. Please try again' }
+            throw error
         }
     }
 

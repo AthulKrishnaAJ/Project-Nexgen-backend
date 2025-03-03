@@ -3,6 +3,12 @@ import { Request, Response, NextFunction } from "express";
 import ICompanyJobInterface from "../../../entities/company/ICompanyJobInteractor";
 import httpStatus from "../../../entities/rules/httpStatusCodes";
 
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @returns {Promise<any>}
+ */
 
 class companyJobController {
     private interactor: ICompanyJobInterface

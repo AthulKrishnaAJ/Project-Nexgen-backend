@@ -12,9 +12,13 @@ const jobPostSchema = new Schema<JobPostRule>({
         required: true
     },
 
-    location: {
+    state: {
         type: String,
-        required: true
+        required: true,
+    },
+    district: {
+        type: String,
+        required: true,
     },
 
     employmentType: {
