@@ -7,7 +7,7 @@ import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import { findCompanyProjection } from "../../entities/rules/projections";
-import { CompanyDetailsState } from "../../entities/rules/commonRules";
+
 
 
 class CommonRepository implements IcommonRepository{

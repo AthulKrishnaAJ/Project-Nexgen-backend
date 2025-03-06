@@ -18,12 +18,19 @@ import companyJobController from '../../../adapters/controllers/companyControlle
 import CompannyProfileCases from '../../../usecases/company/companyProfileCases'
 import CompanyProfileController from '../../../adapters/controllers/companyController/companyProfileController'
 
+//Seeker based files
+import CompanySeekerCases from '../../../usecases/company/companySeekerCases'
+import CompanySeekerController from '../../../adapters/controllers/companyController/companySeekerController'
+
+
+
 const companyRouter: Router = express.Router()
 
 const repository = new CompanyRepository()
 const commonRepository = new CommonRepository()
 const mailer = new Mailer()
 const jwtService = new JwtService()
+
 
 
 const companyAuth = new CompanyAuth(repository, mailer, jwtService, commonRepository)
@@ -34,6 +41,10 @@ const jobController = new companyJobController(companyJobCases)
 
 const companyProfileCases = new CompannyProfileCases(repository, commonRepository)
 const companyController = new CompanyProfileController(companyProfileCases)
+
+const companySeekerCases = new CompanySeekerCases(repository, commonRepository)
+const seekerController = new CompanySeekerController(companySeekerCases)
+
 
 //Auth based routes
 companyRouter.post('/signup', authController.employerSendOtpControl)
@@ -46,9 +57,13 @@ companyRouter.post('/changePassword', authController.employerChangePasswordContr
 //Job based routes
 companyRouter.post('/jobPost', authMiddleware('company'), jobController.jobPostControl)
 companyRouter.get('/getJobs/:companyId', authMiddleware('company'), jobController.getAllJobsControl)
-companyRouter.post('/changeJobStatus',  authMiddleware('company'), jobController.changejobStatusControl)
+companyRouter.post('/changeJobStatus', authMiddleware('company'), jobController.changejobStatusControl)
+companyRouter.post('/editJob', authMiddleware('company'), jobController.editJobControl)
 
 //Profile based routes
-companyRouter.get('/getCompany/:companyId', companyController.getCompanyControl)
+companyRouter.get('/getCompany/:companyId', authMiddleware('company'), companyController.getCompanyControl)
+
+//Seeker based routes
+companyRouter.get('/getApplicants/:companyId', authMiddleware('company'), seekerController.getApplicantsControl)
 
 export default companyRouter

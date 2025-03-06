@@ -6,7 +6,7 @@ export interface UserDataForAdmin {
     firstName: string;
     lastName: string;
     email: string;
-    mobile: string;
+    mobile?: string;
     blocked?: boolean;
     logo?: string | null;
     createdAt?: Date;

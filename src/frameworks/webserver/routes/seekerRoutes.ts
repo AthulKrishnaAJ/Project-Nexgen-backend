@@ -56,6 +56,7 @@ seekerRouter.post('/login', authController.loginControl)
 seekerRouter.post('/emailVerify', authController.emailVerifyControl)
 seekerRouter.post('/verifyOtpForChangePassword', authController.changePassowrdVerifyOtpControl)
 seekerRouter.post('/changePassword', authController.changePasswordControl)
+seekerRouter.post('/googleAuth', authController.googleAuthControl)
 
 
 //profile based routes
@@ -68,6 +69,7 @@ seekerRouter.put('/removeResume', authMiddleware('user'), profileController.remo
 
 //job based routes
 seekerRouter.get('/getJobs', jobController.getAllJobsControl)
+seekerRouter.post('/applyJob', authMiddleware('user'), jobController.applyJobControl)
 
 //company based routes
 seekerRouter.get('/getCompanies', seekerCompanyController.getAllCompanyControl)

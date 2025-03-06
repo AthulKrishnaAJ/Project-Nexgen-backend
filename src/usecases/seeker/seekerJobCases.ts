@@ -5,7 +5,8 @@ import httpStatus from "../../entities/rules/httpStatusCodes"
 import ISeekerJobInterface from "../../entities/seeker/ISeekerJobInterface"
 import ISeekerRepository from "../../entities/IRepositories/iSeekerRepository"
 import ICommonRepository from "../../entities/IRepositories/ICommonRepository"
-import { JobPostRule, GetAllJobsState } from "../../entities/rules/companyRules"
+import { GetAllJobsState } from "../../entities/rules/companyRules"
+import { JobApplyProps } from "../../entities/rules/seekerRules"
 
 class SeekerJobCases implements ISeekerJobInterface {
     private repository: ISeekerRepository
@@ -36,6 +37,32 @@ class SeekerJobCases implements ISeekerJobInterface {
                 return {jobs: jobWithCompany, statusCode: httpStatus.OK}
             } catch (error: any) {
                 console.error('Errror in getting all Jobs: ', error.message)
+                throw error
+            }
+        }
+
+        async applyJobCase(data: JobApplyProps): Promise<{statusCode: number, message: string}> {
+            try {
+                const createApplication = await this.repository.applicationCreateRepo(data)
+
+                if(!createApplication.created){
+                    if(createApplication.message === 'conflict'){
+                        throw new AppError('Already applied this job', httpStatus.CONFLICT)
+                    }
+                    throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+                }
+                console.log('job Id:==>',data.jobId)
+                console.log('company Id: ==>', data.companyId)
+                console.log('seekerId Id: ==>', data.seekerId)
+                console.log( 'application Id:==>',createApplication.applicationId)
+                
+                const updateJob = await this.repository.updateJobWithApplicationIdRepo(data.jobId, createApplication.applicationId!)
+                if(!updateJob){
+                    throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+                }
+                return {statusCode: httpStatus.OK, message: 'Application submitted'}
+            } catch (error: any) {
+                console.error('Error in applyJobCase at usecase/seekerJobCase: ', error.message)
                 throw error
             }
         }

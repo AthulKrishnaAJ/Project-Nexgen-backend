@@ -48,13 +48,13 @@ export interface JobPostRule {
     skills: string[];
     requirements: string[];
     benefits: string[];
-    jobApplications?: Types.ObjectId[] | [];
+    jobApplications?: string[] | [];
     companyId: Types.ObjectId;
     status?: 'open' | 'closed'
 
 }
 
-export interface JobPostDataState {
+export interface JobDataPropsState {
     title: string;
     state: string;
     district: string;
@@ -69,6 +69,7 @@ export interface JobPostDataState {
     benefits: string[];
     description: string;
     companyId: string;
+    jobId?: string;
 }
 
 
@@ -107,11 +108,14 @@ export interface GetAllJobsState {
     skills: string[];
     requirements: string[];
     benefits: string[];
-    jobApplications?: Types.ObjectId[] | [];
+    jobApplications?: string[] | [];
     companyId: Types.ObjectId;
     status?: 'open' | 'closed'
     companyName?: string;
 }
+
+
+
 
 
   

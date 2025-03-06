@@ -19,11 +19,12 @@ const seekerSchema = new Schema<seekerDetailsRule>({
 
     mobile: {
         type: String,
-        required: true
+        default: ''
+        
     },
     password: {
         type: String,
-        required: true
+        default: ''
     },
 
     logo: {

@@ -1,11 +1,11 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
 export interface seekerDetailsRule {
     _id?: Types.ObjectId 
     firstName: string;
     lastName: string;
     email: string;
-    mobile: string;
+    mobile?: string;
     password?: string;
     blocked?: boolean
     logo?: string;
@@ -85,4 +85,18 @@ export interface SeekerFetchingDetailsRule {
     certifications?: string[] | [];
     experience?: SeekerExperienceRule[] | [];
     educations?: SeekerEducationRule[] | [];
+}
+
+
+
+  export interface JobApplyProps {
+    firstName: string;
+    lastName: string;
+    email: string;
+    mobile: string;
+    jobId: string;
+    companyId: string;
+    seekerId: string;
+    resume: string;
+    coverLetter: string;
 }
