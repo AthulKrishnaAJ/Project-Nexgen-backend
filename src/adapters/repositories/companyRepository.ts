@@ -1,10 +1,12 @@
 import ICompanyRepository from "../../entities/IRepositories/ICompanyRepository";
-import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
-import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import redisClient from "../../frameworks/database/redis/redisConnection";
-import { EmployerDetailsRule, JobPostDataState, JobPostRule , changeJobStatusProps} from "../../entities/rules/companyRules";
+import { EmployerDetailsRule, JobDataPropsState, JobPostRule , changeJobStatusProps} from "../../entities/rules/companyRules";
+import { JobApplication, JobApplicationJobDetailState } from "../../entities/rules/commonRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
 
+import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
+import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
+import jobApplicationModel from "../../frameworks/database/mongoDB/models/jobApplicationSchema";
 class CompanyRepository implements ICompanyRepository {
 
     async companyExists(email: string): Promise<{success: boolean, companyData?: EmployerDetailsRule}>{
@@ -181,7 +183,7 @@ class CompanyRepository implements ICompanyRepository {
     }
 
 
-    async companyJobPostRepo(jobData: JobPostDataState): Promise<boolean> {
+    async companyJobPostRepo(jobData: JobDataPropsState): Promise<boolean> {
         try {
             console.log('Data in company job post repooooooooooo: ', jobData)
             if(!jobData){
@@ -221,7 +223,7 @@ class CompanyRepository implements ICompanyRepository {
 
     async  getAllJobsRepo(companyId: string): Promise<{success: boolean, jobs?: JobPostRule[]}> {
         try {
-            const jobs = await jobPostModel.find({companyId: companyId})
+            const jobs = await jobPostModel.find({companyId: companyId}).sort({createdAt: -1})
             if(!jobs){
                 return {success: false}
             }
@@ -247,6 +249,58 @@ class CompanyRepository implements ICompanyRepository {
         }
     }
 
+    async editProfileRepo(data: JobDataPropsState): Promise<boolean> {
+        try {
+            const {jobId, ...formdData} = data
+
+            const formattedUpdate =  {
+                title: formdData.title,
+                state: formdData.state,
+                district: formdData.district,
+                employmentType: formdData.employmentType,
+                workMode: formdData.workMode,
+                salaryRange: {
+                    min: formdData.minSalary,
+                    max: formdData.maxSalary
+                },
+                experience: {
+                    min: formdData.minExperience,
+                    max: formdData.maxExperience
+                },
+                skills: formdData.skills,
+                requirements: formdData.requirements,
+                benefits: formdData.benefits,
+                description: formdData.description,
+            }
+            const editJob = await jobPostModel.updateOne({_id: jobId}, {$set: formattedUpdate})
+
+            if(editJob.modifiedCount === 0){
+                return false
+            }
+            return true
+        } catch (error: any) {
+            console.error('Error in editProfileRepo at repository/companyRepository: ', error.message)
+            return false
+        }
+    }
+
+    async getApplicantsRepo(companyId: string): Promise<{success: boolean; applications?: JobApplication[]}> {
+        try {
+            const applications = await jobApplicationModel.find({companyId: companyId})
+            .populate({
+                path: "jobId",
+                select: '-__v -updatedAt -jobApplications'
+            }).sort({createdAt: -1}).lean()
+
+            if(!applications){
+                return {success: false}
+            }
+            return {success: true, applications: applications as JobApplication[]}
+        } catch (error: any) {
+            console.error('Error in editProfileRepo at repository/companyRepository: ', error.message)
+            return {success: false}
+        }
+    }
 
 }
 

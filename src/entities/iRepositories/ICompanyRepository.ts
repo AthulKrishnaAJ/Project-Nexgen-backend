@@ -1,6 +1,6 @@
 
-import { EmployerDetailsRule } from "../rules/companyRules"
-import { JobPostDataState, JobPostRule, changeJobStatusProps } from "../rules/companyRules";
+import { JobDataPropsState, JobPostRule, changeJobStatusProps, EmployerDetailsRule } from "../rules/companyRules";
+import { JobApplication, JobApplicationJobDetailState } from "../rules/commonRules";
 
 export default interface ICompanyRepository {
     companyExists(email: string): Promise<{success: boolean, companyData?: EmployerDetailsRule}>;
@@ -10,8 +10,9 @@ export default interface ICompanyRepository {
     companyLoginRepo(email: string, password: string): Promise<{userData?: EmployerDetailsRule, success: boolean, message: string}>
     companyUpdateFieldByEmailRepo(email: string, value: string, field: string): Promise<{success: boolean, message?: string}>
     companyUpdateFieldByIdRepo(id: string, updateData: any): Promise<{success: boolean}>
-    companyJobPostRepo(jobData: JobPostDataState): Promise<boolean>;
+    companyJobPostRepo(jobData: JobDataPropsState): Promise<boolean>;
     getAllJobsRepo(companyId: string): Promise<{success: boolean, jobs?: JobPostRule[]}>;
-    updateJobsFieldRepo(data: changeJobStatusProps): Promise<boolean>
-    
+    updateJobsFieldRepo(data: changeJobStatusProps): Promise<boolean>;
+    editProfileRepo(data: JobDataPropsState): Promise<boolean>;
+    getApplicantsRepo(companyId: string): Promise<{success: boolean; applications?: JobApplication[]}>
 }

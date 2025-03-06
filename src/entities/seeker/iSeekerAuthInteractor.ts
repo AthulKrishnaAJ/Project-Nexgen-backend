@@ -8,6 +8,7 @@ interface ISeekerAuthInterface {
     verifyEmail(email: string): Promise<{success: boolean, message: string}>
     otpVerificationForChangingPassword(email: string, otp: string): Promise<{success: boolean, message: string}>
     changePasswordCase(email: string, password: string): Promise<{success: boolean, message: string}>
+    googleAuthCase(credential: string, clientId: string): Promise<{statusCode: number; message: string; seekerData: seekerDetailsRule, seekerRefreshToken: string}> 
 }
 
 

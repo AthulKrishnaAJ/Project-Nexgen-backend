@@ -1,5 +1,5 @@
-import { AnyArray } from "mongoose"
-import { seekerDetailsRule, SeekerEditProfileRule } from "../rules/seekerRules"
+
+import { seekerDetailsRule, SeekerEditProfileRule, JobApplyProps } from "../rules/seekerRules"
 
 export default interface ISeekerRepository {
     seekerExists(email: string): Promise<boolean>;
@@ -13,4 +13,7 @@ export default interface ISeekerRepository {
     getSeekerDetails(seekerId: string): Promise<{success: boolean, seeker?:seekerDetailsRule}>;
     updateSeekerArrayFields (seekerId: string, field: string, data: string): Promise<boolean>;
     removeSeekerArrayValues(seekerId: string, field: string, value: string): Promise<boolean>
+    applicationCreateRepo(data: JobApplyProps): Promise<{created: boolean; message?: string, applicationId?: string}>
+    updateJobWithApplicationIdRepo(jobId: string, applicationId: string): Promise<boolean>;
+    googleAuthenticationSeekerRepo(email: string, firstName: string, lastName: string): Promise<{user?: seekerDetailsRule, success: boolean}>
 }

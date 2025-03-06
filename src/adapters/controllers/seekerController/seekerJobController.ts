@@ -26,6 +26,15 @@ class SeekerJobController {
             next(error)
         }
     }
+
+    applyJobControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const response = await this.interactor.applyJobCase(req.body)
+            return res.status(response.statusCode).json({status: true, message: response.message})
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default SeekerJobController

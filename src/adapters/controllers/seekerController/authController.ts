@@ -144,6 +144,23 @@ class AuthController {
             next(error)
         }
     }
+
+    googleAuthControl = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+        try {
+            const {credential, clientId} = req.body
+            const response = await this.interactor.googleAuthCase(credential, clientId)
+            res.cookie('refreshToken', response.seekerRefreshToken,{
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',  
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/'
+            })  
+            return res.status(response.statusCode).json({status: true, message: response.message, user: response.seekerData})
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default AuthController

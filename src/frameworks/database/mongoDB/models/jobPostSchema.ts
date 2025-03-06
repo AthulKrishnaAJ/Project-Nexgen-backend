@@ -61,7 +61,7 @@ const jobPostSchema = new Schema<JobPostRule>({
     },
 
     jobApplications: {
-        type: [Schema.Types.ObjectId],
+        type: [String],
         ref: 'Job-Application',
         default: []
     },

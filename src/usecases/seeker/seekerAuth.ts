@@ -1,4 +1,6 @@
 
+import { OAuth2Client } from "google-auth-library";
+
 //Files
 import ISeekerAuthInterface from "../../entities/seeker/ISeekerAuthInteractor";
 import ISeekerRepository from "../../entities/IRepositories/iSeekerRepository";
@@ -16,12 +18,14 @@ class UserAuth implements ISeekerAuthInterface {
     private mailer: IMailerInterface
     private jwtService: IJwtSerivce
     private commonRepository: ICommonRepository
+    private client
 
     constructor(repository: ISeekerRepository, mailer: IMailerInterface, jwt: IJwtSerivce, commonRepo: ICommonRepository) {
         this.repository = repository
         this.mailer = mailer
         this.jwtService = jwt
         this.commonRepository = commonRepo
+        this.client = new OAuth2Client()
     }
 
     async sendOtp(userData: seekerDetailsRule): Promise<{ success: boolean, message: string }> {
@@ -183,6 +187,40 @@ class UserAuth implements ISeekerAuthInterface {
             return {success: isPasswordUpdate.success, message: 'Password updated successful'}
         } catch (error: any) {
             console.error('Error in changePasswordCase at usecase/seekerAuth: ', error.message)
+            throw error
+        }
+    }
+
+    async googleAuthCase(credential: string, clientId: string): Promise<{statusCode: number, message: string, seekerData: seekerDetailsRule, seekerRefreshToken: string}> {
+        try {
+            const ticket = await this.client.verifyIdToken({
+                idToken: credential,
+                audience: clientId
+            })
+            const payload = ticket.getPayload()
+            console.log('PaaaayLoad:', payload)
+            if(!payload){
+                throw new AppError('Could not find your account signup manually', httpStatus.BAD_REQUEST)
+            }
+            const {email, given_name, family_name} = payload
+
+            const findSeeker = await this.repository.googleAuthenticationSeekerRepo(email!, given_name!, family_name!)
+
+            if(!findSeeker.success || !findSeeker.user){
+                throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            
+            const accessToken = this.jwtService.generateAccessToken({ 
+                id: findSeeker.user?._id, email: findSeeker.user?.email, role: 'user' }, { expiresIn: '1hr' })
+            const refreshToken = this.jwtService.generateRefreshToken({ 
+                id: findSeeker.user?._id, email: findSeeker.user?.email, role: 'user' }, { expiresIn: '1d' })
+
+            findSeeker.user.accessToken = accessToken
+            findSeeker.user.role = 'user'
+
+            return {statusCode: httpStatus.OK, message: 'Login successful', seekerData: findSeeker.user, seekerRefreshToken: refreshToken}
+        } catch (error: any) {
+            console.error('Error in googleAuthCase at usecase/seekerAuth: ', error.message)
             throw error
         }
     }

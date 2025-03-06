@@ -1,9 +1,14 @@
+
 //Files
 import iSeekerRepository from "../../entities/IRepositories/iSeekerRepository";
 import redisClient from "../../frameworks/database/redis/redisConnection";
-import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
-import { seekerDetailsRule, SeekerEditProfileRule, SeekerFetchingDetailsRule } from "../../entities/rules/seekerRules";
+import { JobApplyProps, seekerDetailsRule, SeekerEditProfileRule } from "../../entities/rules/seekerRules";
 import { hashPassword, comparePassword } from "../../frameworks/services/passwordService";
+
+//models
+import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
+import jobApplicationModel from "../../frameworks/database/mongoDB/models/jobApplicationSchema";
+import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 
 
 class SeekerRepository implements iSeekerRepository {
@@ -231,6 +236,65 @@ class SeekerRepository implements iSeekerRepository {
         }
     }
 
+    async applicationCreateRepo(data: JobApplyProps): Promise<{created: boolean; message?: string, applicationId?: string}> {
+        try {
+            const applicationExist = await jobApplicationModel.findOne({
+                seekerId: data.seekerId,
+                jobId: data.jobId
+            })
+            if(applicationExist){
+                return {created: false, message: 'conflict'}
+            }
+            const application = await jobApplicationModel.create(data)
+            console.log('After create application: ', application)
+            return {created: true, applicationId: application._id!.toString()}
+        } catch (error: any) {
+            console.error('Error in removeSeekerArrayValues at repository/seekerRepository: ', error.message)
+            return {created: false, message: 'server error'}
+        }
+    }
+
+    async updateJobWithApplicationIdRepo(jobId: string, applicationId: string): Promise<boolean> {
+        try {
+            const result = await jobPostModel.updateOne(
+                {_id: jobId},
+                {$push: {jobApplications: applicationId}}
+            )
+
+            if(result.modifiedCount === 0){
+                return false
+            }
+            return true
+        } catch (error: any) {
+            console.error('Error in updateJobWithApplicationIdRepo at repository/seekerRepository: ', error.message)
+            return false
+        }
+    }
+
+    async googleAuthenticationSeekerRepo(email: string, firstName: string, lastName: string): Promise<{user?: seekerDetailsRule, success: boolean}> {
+        try {
+            let findUser = await seekerModel.findOne({email})
+            if(!findUser){
+                findUser = await seekerModel.create({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                })
+            }
+            const data: seekerDetailsRule = {
+                _id: findUser._id,
+                firstName: findUser.firstName,
+                lastName: findUser.lastName,
+                email: findUser.email,
+                blocked: findUser.blocked
+            }
+            
+            return {success: true, user: data}
+        } catch (error: any) {
+            console.error('Error in googleAuthenticationSeekerRepo at repository/seekerRepository: ', error.message)
+            return {success: false}
+        }
+    }
 
 }
 
