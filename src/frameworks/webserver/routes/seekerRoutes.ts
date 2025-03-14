@@ -70,6 +70,7 @@ seekerRouter.put('/removeResume', authMiddleware('user'), profileController.remo
 //job based routes
 seekerRouter.get('/getJobs', jobController.getAllJobsControl)
 seekerRouter.post('/applyJob', authMiddleware('user'), jobController.applyJobControl)
+seekerRouter.get('/searchJob', jobController.searchJobControl)
 
 //company based routes
 seekerRouter.get('/getCompanies', seekerCompanyController.getAllCompanyControl)

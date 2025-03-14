@@ -100,3 +100,8 @@ export interface SeekerFetchingDetailsRule {
     resume: string;
     coverLetter: string;
 }
+
+export interface JobSearchProps {
+    searTerm: string;
+    searchType: string;
+}

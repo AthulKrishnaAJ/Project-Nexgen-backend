@@ -6,7 +6,7 @@ import ISeekerJobInterface from "../../entities/seeker/ISeekerJobInterface"
 import ISeekerRepository from "../../entities/IRepositories/iSeekerRepository"
 import ICommonRepository from "../../entities/IRepositories/ICommonRepository"
 import { GetAllJobsState } from "../../entities/rules/companyRules"
-import { JobApplyProps } from "../../entities/rules/seekerRules"
+import { JobApplyProps, JobSearchProps } from "../../entities/rules/seekerRules"
 
 class SeekerJobCases implements ISeekerJobInterface {
     private repository: ISeekerRepository
@@ -51,10 +51,6 @@ class SeekerJobCases implements ISeekerJobInterface {
                     }
                     throw new AppError('Somthing went wrong, please try again', httpStatus.INTERNAL_SERVER_ERROR)
                 }
-                console.log('job Id:==>',data.jobId)
-                console.log('company Id: ==>', data.companyId)
-                console.log('seekerId Id: ==>', data.seekerId)
-                console.log( 'application Id:==>',createApplication.applicationId)
                 
                 const updateJob = await this.repository.updateJobWithApplicationIdRepo(data.jobId, createApplication.applicationId!)
                 if(!updateJob){
@@ -63,6 +59,16 @@ class SeekerJobCases implements ISeekerJobInterface {
                 return {statusCode: httpStatus.OK, message: 'Application submitted'}
             } catch (error: any) {
                 console.error('Error in applyJobCase at usecase/seekerJobCase: ', error.message)
+                throw error
+            }
+        }
+
+        async searchJobCase(searchTerm: string, searchType: string): Promise<{jobs: GetAllJobsState[], statusCode: number}> {
+            try {
+                const getSearchedJobs = await this.commonRepository.getSearchedJobsRepo(searchTerm, searchType)
+                return {statusCode: httpStatus.OK, jobs: getSearchedJobs}
+            } catch (error: any) {
+                console.error('Error in searchJobCase at usecase/seekerJobCase: ', error.message)
                 throw error
             }
         }

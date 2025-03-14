@@ -7,128 +7,158 @@ import seekerModel from "../../frameworks/database/mongoDB/models/seekerSchema";
 import companyModel from "../../frameworks/database/mongoDB/models/employerSchema";
 import jobPostModel from "../../frameworks/database/mongoDB/models/jobPostSchema";
 import { findCompanyProjection } from "../../entities/rules/projections";
+import AppError from "../../frameworks/utils/errorInstance";
+import { FilterQuery } from "mongoose";
+import httpStatus from "../../entities/rules/httpStatusCodes";
 
 
 
-class CommonRepository implements IcommonRepository{
 
-    async saveOtpAndEmail(email: string, otp: string): Promise<{stored: boolean}> {
+class CommonRepository implements IcommonRepository {
+
+    async saveOtpAndEmail(email: string, otp: string): Promise<{ stored: boolean }> {
         try {
             const expirationTime = 120
-             const dataToStore = {
+            const dataToStore = {
                 otp,
                 email
-             }
-             await redisClient.set(email, JSON.stringify(dataToStore), {
+            }
+            await redisClient.set(email, JSON.stringify(dataToStore), {
                 EX: expirationTime
-             })
-             console.log('OTP and email saved in redis')
-             return {stored: true}
+            })
+            console.log('OTP and email saved in redis')
+            return { stored: true }
         } catch (error: any) {
             console.error('Error saving OTP and email in redis: ', error.message)
-            return {stored: false}
+            return { stored: false }
         }
     }
 
-    async verifyOtpAndEmail(email: string, otp: string): Promise<{success: boolean, message?: string}> {
+    async verifyOtpAndEmail(email: string, otp: string): Promise<{ success: boolean, message?: string }> {
         try {
             const storedData = await redisClient.get(email)
-            if(!storedData) {
+            if (!storedData) {
                 console.error('Data not exist in redis')
-                return {success: false, message: 'Data not found'}
+                return { success: false, message: 'Data not found' }
             }
             const parseData = JSON.parse(storedData)
-            const {otp: storedOtp, email: storedEmail} = parseData
-            
-            if(storedEmail === email && storedOtp === otp){
-                return {success: true}
+            const { otp: storedOtp, email: storedEmail } = parseData
+
+            if (storedEmail === email && storedOtp === otp) {
+                return { success: true }
             }
-            return {success: false}
-       
+            return { success: false }
+
         } catch (error: any) {
             console.error('Error in finding otp and email from redis at commonRepository: ', error.message)
-            return {success: false, message: 'Somthing went wrong'}
+            return { success: false, message: 'Somthing went wrong' }
         }
     }
 
     async findUserById(id: string): Promise<{ userData?: UserDataForAdmin; success: boolean; }> {
-        try{
+        try {
             const user = await seekerModel.findById(id)
-            if(!user){
-                return {success: false}
+            if (!user) {
+                return { success: false }
             }
-            return {userData: user, success: true}
-        }catch(error: any){
+            return { userData: user, success: true }
+        } catch (error: any) {
             console.error('Error in findUserById at repository/commonRepository: ', error.message)
-            return {success: false}
+            return { success: false }
         }
     }
 
-    async findCompanyByEmail(email: string): Promise<{companyData?: CompanyDataForAdmin, success: boolean}> {
+    async findCompanyByEmail(email: string): Promise<{ companyData?: CompanyDataForAdmin, success: boolean }> {
         try {
-            const company = await companyModel.findOne({email: email})
-            if(!company){
-                return {success: false}
+            const company = await companyModel.findOne({ email: email })
+            if (!company) {
+                return { success: false }
             }
-            return {companyData: company, success: true}
+            return { companyData: company, success: true }
         } catch (error: any) {
             console.error('Error in findCompanyByEmail at repository/commonRepository: ', error.message)
-            return {success: false}
-            
+            return { success: false }
+
         }
     }
 
-    async getAllJobsRepo():Promise<{success: boolean, jobs?:JobPostRule[]}>{
+    async getAllJobsRepo(): Promise<{ success: boolean, jobs?: JobPostRule[] }> {
         try {
-            const getJobs = await jobPostModel.find({ status: "open" }).lean()
-            if(!getJobs){
-                return {success: false}
+
+            const getJobs = await jobPostModel.find({ status: "open" }).limit(10).lean()
+            if (!getJobs) {
+                return { success: false }
             }
-            return {success: true, jobs: getJobs}
+            return { success: true, jobs: getJobs }
         } catch (error: any) {
             console.error('Error in getAllJobsRepo at repository/commonRepository: ', error.message)
-            return {success: false}
+            return { success: false }
         }
     }
 
 
-    async getCompaniesById(companyIds: string[]): Promise<{success: boolean; companyDatas?: GetCompanyDetialsState[]}> {
+    async getCompaniesById(companyIds: string[]): Promise<{ success: boolean; companyDatas?: GetCompanyDetialsState[] }> {
         try {
             const companies = await companyModel.find(
-                {_id: {$in: companyIds}},
+                { _id: { $in: companyIds } },
                 findCompanyProjection
             ).lean()
 
-            return {success: true, companyDatas: companies as GetCompanyDetialsState[]}
+            return { success: true, companyDatas: companies as GetCompanyDetialsState[] }
         } catch (error: any) {
             console.error('Error in getCompanyByCompanyId at repository/commonRepository: ', error.message)
-            return {success: false}
+            return { success: false }
         }
     }
 
 
-    async getAllCompaniesRepo(): Promise<{ success: boolean; company?: EmployerDetailsRule[]}> {
+    async getAllCompaniesRepo(): Promise<{ success: boolean; company?: EmployerDetailsRule[] }> {
         try {
             const companies = await companyModel.find(
-                {blocked: false, verify: {$ne: 'reject'}}, 
-                {password: 0}).lean()
+                { blocked: false, verify: { $ne: 'reject' } },
+                { password: 0 }).lean()
 
-            return {success: true, company: companies}
+            return { success: true, company: companies }
         } catch (error: any) {
             console.error('Error in getAllCompaniesRepo at commonRepository')
-            return {success: false}
+            return { success: false }
         }
     }
 
-    async getCompanyByIdRepo(companyId: string): Promise<{success: boolean, company?: EmployerDetailsRule | null}> {
+    async getCompanyByIdRepo(companyId: string): Promise<{ success: boolean, company?: EmployerDetailsRule | null }> {
         try {
-            const companyDetail = await companyModel.findById(companyId, {password: 0})
-            return {success: true, company: companyDetail}
+            const companyDetail = await companyModel.findById(companyId, { password: 0 })
+            return { success: true, company: companyDetail }
         } catch (error) {
             console.error('Error in getCompanyByIdRepo at commonRepository')
-            return {success: false}
+            return { success: false }
         }
-    }   
+    }
+
+    async getSearchedJobsRepo(searchTerm: string, searchType: string): Promise<JobPostRule[]> {
+        try {
+            let query: FilterQuery<JobPostRule> =  { status: 'open' };
+            console.log('Search term: ', searchTerm)
+            if (searchTerm) {
+                if (searchType === 'job') {
+                    query.title = { $regex: searchTerm, $options: 'i' } 
+                } else if (searchType === 'location') {
+                    query. $or = [
+                        { state: { $regex: searchTerm, $options: "i" } },
+                        { district: { $regex: searchTerm, $options: "i" } },
+                    ]
+                }
+            }
+            const jobs = await jobPostModel.find(query).lean()
+            if (!jobs) {
+                throw new AppError('Somthing went wrong', httpStatus.INTERNAL_SERVER_ERROR)
+            }
+            return jobs
+        } catch (error: any) {
+            console.error('Error in getSearchedJobsRepo at commonRepository: ', error.message)
+            throw error
+        }
+    }
 
 
 }

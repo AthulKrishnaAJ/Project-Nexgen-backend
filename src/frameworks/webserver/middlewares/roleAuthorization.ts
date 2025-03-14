@@ -30,7 +30,7 @@ const authMiddleware = (allowedRole: string) => {
             if(!decode.success || !decode.verifyToken){
        
                 if(!refreshToken){
-                    return res.status(httpStatus.UNAUTHORIZED).json({message: 'Cannot find refresh token, please login'})
+                    return res.status(httpStatus.UNAUTHORIZED).json({message: 'Cannot found token, please login'})
                 }
 
                 const refreshDecode = jwtService.verifyRefreshToken(refreshToken)
